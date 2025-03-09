@@ -6,7 +6,8 @@ const LoginContainer = () => {
   const [isUserLogin, setIsUserLogin] = useState(true);
 
   return (
-    <div className={`flex justify-center h-screen transition-all duration-500 ${isUserLogin ? "" : "flex-row-reverse"}`}>
+    <div className="h-screen flex justify-center items-center">
+        <div className={`flex justify-center transition-all duration-500 ${isUserLogin ? "" : "flex-row-reverse"}`}>
       {/* Left Side - Active Login Form */}
       <div className=" flex items-center justify-center">
         {isUserLogin ? <LoginUser /> : <LoginHost />}
@@ -22,6 +23,7 @@ const LoginContainer = () => {
           {isUserLogin ? "Login as Host" : "Login as User"}
         </button>
       </div>
+    </div>
     </div>
   );
 };

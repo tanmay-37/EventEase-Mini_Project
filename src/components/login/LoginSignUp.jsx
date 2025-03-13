@@ -16,14 +16,14 @@ const LoginSignUp = ({ userType, action, setAction }) => {
   };
 
   return (
-    <div className={`${login.container}`}>
+    <div className={`${login.container} mx-4 md:mx-0`}>
       <div className="flex flex-col justify-center relative">
         <h2 className="font-semibold">{userType}</h2>
         <h1 className="text-2xl font-bold">{action}</h1>
         <img src={LoginUnderline} alt="underline" className="w-16 mt-1 self-center" />
       </div>
 
-      <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <form className="mt-6 space-y-4 px-2 md:px-0" onSubmit={(e) => e.preventDefault()}>
         {/* Show UserName for Host SignUp & User SignUp */}
         {action === "SignUp" && (userType === "User" || userType === "Host") && (
           <>
@@ -90,8 +90,8 @@ const LoginSignUp = ({ userType, action, setAction }) => {
       <div className="my-4 border-b border-gray-300 w-full" />
 
       {/* Google Sign-In Button */}
-      <button className="w-full flex items-center justify-center bg-white text-black border border-gray-300 rounded-lg py-2 shadow-md hover:shadow-lg transition">
-        <FcGoogle className="text-2xl mr-2" />
+      <button className="w-full flex items-center justify-center bg-white text-black border border-gray-300 rounded-lg py-2 shadow-md hover:shadow-lg transition text-sm md:text-base">
+        <FcGoogle className="text-xl md:text-2xl mr-2" />
         Sign In with Google
       </button>
     </div>

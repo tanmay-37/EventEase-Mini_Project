@@ -1,19 +1,18 @@
-import {useContext} from 'react'
-import EventCard from '../components/EventCard/EventCard'
-import { EventContext } from '../contexts/EventContext'
+// EventsPage.jsx
+import { useContext } from 'react';
+// import EventCard from '../../contexts/EventContext';
+import { EventContext } from '../contexts/EventContext';
 
-// event page creation
+const EventsPage = () => {
+  const { events } = useContext(EventContext);
 
-const Eventpage = () => {
-    const {events} = useContext(EventContext)
-
-    return (
-        <div className='events-container'>
-            {events.map((event) => (
-                <EventCard key = {event.id} event = {event}/>
-            ))}
-        </div>
-    );
+  return (
+    <div className="flex flex-wrap justify-center p-4">
+      {events.map((event) => (
+        <EventCard key={event.id} event={event} />
+      ))}
+    </div>
+  );
 };
 
-export default Eventpage;
+export default EventsPage;

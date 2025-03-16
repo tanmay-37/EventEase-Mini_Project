@@ -6,7 +6,7 @@ function Card(props) {
 
   return (
     <>
-     <div className='bg-purple-500 p-2 w-[500px] h-[750px] max-h-screen text-start rounded-3xl mt-5'> 
+     <div className='bg- p-2 w-[500px] h-[750px] max-h-screen text-start rounded-3xl mt-5'> 
 
         {/* banner image */}
         <div className='w-full h-[300px] bg-black rounded-tl-3xl rounded-tr-3xl'>

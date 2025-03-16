@@ -16,7 +16,7 @@ function App() {
     <>
     
     {/* event cards */}
-     <div className='bg-purple-400 p-6 w-screen h-auto text-start'>
+     <div className='bg-[#F5EFFF] p-6 w-screen h-auto text-start'>
          
         <h2 className='text-black text-5xl font-bold'>Upcoming Events</h2>
 

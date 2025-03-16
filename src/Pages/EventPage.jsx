@@ -8,6 +8,7 @@ const EventsPage = () => {
 
   return (
     <div className="flex flex-wrap justify-center p-4">
+      Events page
       {events.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}

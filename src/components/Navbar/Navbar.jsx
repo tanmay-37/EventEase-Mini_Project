@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png'
 import { EventContext } from '../../contexts/EventContext';
 
+
 const Navbar = () => {
   // Get the context value, ensuring it's not undefined
   const eventContext = useContext(EventContext);

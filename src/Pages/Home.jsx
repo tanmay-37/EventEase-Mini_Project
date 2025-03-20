@@ -6,7 +6,7 @@ const Home = () => {
     
 
     return (
-        <div></div>
+        <div className='w-screen h-[800px] bg-grey-400 text-center text-5xl'>landing Page</div>
     );
 };
 

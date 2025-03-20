@@ -1,97 +1,96 @@
-// EventForm.jsx
-import { useState, useContext } from 'react';
+import { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EventContext } from '../../contexts/EventContext';
+import { useEvents } from '../../contexts/EventContext'; // import context
 
+// event card template details
 const EventForm = () => {
-  const [formData, setFormData] = useState({
-    title: '',
+  const {addEvent} = useEvents(); // get addEvent function from context
+  const navigate = useNavigate();
+
+  const [event, setEvent] = useState({
     image: '',
+    title: '',
     description: '',
     date: '',
     venue: '',
-    link: ''
+    registrationLink: ''
   });
   
-  const { addEvent, setIsModalOpen , isModalOpen } = useContext(EventContext);
-  const navigate = useNavigate();
+  const [preview, setPreview] = useState(null); // To show image preview
 
+
+  const handleChange = (e) => {
+    setEvent({ ...event , [e.target.name] : e.target.value});
+  }
+
+  // Handle Image Upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]; // Get the first selected file
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file); // Convert file to base64
+      reader.onloadend = () => {
+        setEvent({ ...event, image: reader.result }); // Store base64 string
+        setPreview(reader.result); // Show preview
+      };
+    }
+  };
+
+
+  // handling form submit actions
   const handleSubmit = (e) => {
     e.preventDefault();
-    addEvent({ ...formData, id: Date.now() });
-    setIsModalOpen(false);
-    navigate('/events');
+    addEvent(event);
+    console.log('Event Created :' , event);
+    navigate('/'); // Redirect to events page after form submission
   };
 
   return (
 
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-lg w-full max-w-md">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Event Title"
-            className="w-full p-2 rounded border-2  text-black"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-          />
-          <input
-            type="url"
-            placeholder="Image URL"
-            className="w-full p-2  rounded border-2  text-black"
-            value={formData.image}
-            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-            required
-          />
-          <textarea
-            placeholder="Description"
-            className="w-full p-2 rounded h-24 border-2  text-black"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            required
-          />
-          <input
-            type="date"
-            className="w-full p-2  rounded border-2 text-black"
-            value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Venue"
-            className="w-full p-2 rounded border-2  text-black"
-            value={formData.venue}
-            onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-            required
-          />
-          <input
-            type="url"
-            placeholder="Registration Link"
-            className="w-full p-2 rounded border-2  text-black"
-            value={formData.link}
-            onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-            required
-          />
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Create Event
-            </button>
-          </div>
-        </form>
-      </div>
+    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+      <h2 className="text-xl font-bold mb-4">Create New Event</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+          
+        {/* Image Upload Field */}
+        <label className="block text-sm font-medium text-gray-700">Upload Event Image</label>
+          <input type="file" accept="image/*" onChange={handleImageUpload} 
+            className="w-full p-2 border rounded cursor-pointer" required />
+
+          {/* Image Preview */}
+          {preview && <img src={preview} alt="Event Preview" className="w-full h-40 object-cover rounded-md mt-2" />}
+
+
+
+        <input type="text" name="title" value={event.title} onChange={handleChange}
+          className="w-full p-2 border rounded" placeholder="Enter event title" required />
+
+        <textarea name="description" value={event.description} onChange={handleChange}
+          className="w-full p-2 border rounded" placeholder="Enter event description" required />
+
+        <input type="date" name="date" value={event.date} onChange={handleChange}
+          className="w-full p-2 border rounded" required />
+
+        <input type="text" name="venue" value={event.venue} onChange={handleChange}
+          className="w-full p-2 border rounded" placeholder="Enter venue" required />
+
+        <input type="text" name="registrationLink" value={event.registrationLink} onChange={handleChange}
+          className="w-full p-2 border rounded" placeholder="Enter registration link" required />
+
+        <div className="flex justify-between">
+          <button type="button" onClick={() => navigate('/events')}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+            Cancel
+          </button>
+          <button type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            Create Event
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
   );
 };
 

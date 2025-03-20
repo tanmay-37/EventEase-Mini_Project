@@ -1,13 +1,14 @@
-import { createContext , useState } from "react";
+import { createContext , useState , useContext} from "react";
 
 // context API and state management
 
+// create context
 export const EventContext = createContext();
 
 // provider
 export const EventProvider = ({children}) => {
     const [events , setEvents] = useState([]);
-    const [isModalOpen , setIsModalOpen] = useState(false);
+    
 
     const addEvent = (newEvent) => {
         setEvents([...events , newEvent]);
@@ -15,8 +16,15 @@ export const EventProvider = ({children}) => {
 
     return (
         // wrappig into context
-        <EventContext.Provider value = {{events , addEvent , isModalOpen , setIsModalOpen}}>
+        <EventContext.Provider value = {{events , addEvent}}>
         {children}
         </EventContext.Provider>
     );
 };
+
+// hook to use EventsContext
+export const useEvents = () => {
+    return useContext(EventContext);
+};
+
+

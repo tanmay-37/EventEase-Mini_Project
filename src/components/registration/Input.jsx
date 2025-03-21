@@ -7,7 +7,7 @@ const Input = ({ type, name, placeholder }) => {
       type={type}
       name={name}
       placeholder={placeholder}
-      className={`${styles.input}`}
+      className={`${styles.input} relative z-1`}
     />
   );
 };

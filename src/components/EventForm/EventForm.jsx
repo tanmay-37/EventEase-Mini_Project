@@ -1,6 +1,6 @@
 import { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEvents } from '../../contexts/EventContext'; // import context
+import { useEvents } from '../../context/EventContext'; // import context
 
 // event card template details
 const EventForm = () => {

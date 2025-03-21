@@ -1,12 +1,14 @@
 import React from 'react'
-
+import HeroSection from '../components/landing/HeroSection';
 // event page creation
 
 const Home = () => {
     
 
     return (
-        <div className='w-screen h-[800px] bg-grey-400 text-center text-5xl'>landing Page</div>
+        <div className=''>
+            <HeroSection/>
+        </div>
     );
 };
 

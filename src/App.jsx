@@ -17,9 +17,8 @@ function App() {
   
     <>
     <EventProvider>
-    <Router>
+      <Router>
         <Navbar />
-        {/* <Home /> */}
 
         <Routes>
           <Route path="/" element={<Home />} />
@@ -30,6 +29,7 @@ function App() {
         <EventsHeader />
         </div>
       </Router>
+
     </EventProvider>
     </>
   )

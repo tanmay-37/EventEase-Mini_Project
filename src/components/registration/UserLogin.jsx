@@ -3,8 +3,6 @@ import reg from "../../styles";
 import LoginUnderline from "../../assets/LoginUnderline.png";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../../context/AuthContext";
-import Input from "./Input";
-import Button from "./Button";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -15,16 +13,31 @@ const UserLogin = () => {
   const { login } = UserAuth();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    try {
-      await login(email, password);
-      navigate("/account");
-    } catch (e) {
-      setError(e.message);
-      console.log(e.message);
+  e.preventDefault();
+  setError("");
+
+  try {
+    await login(email, password);
+    const user = auth.currentUser;
+
+    if (user) {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        setError("Unauthorized! Only Users can log in here.");
+        await logout();
+        return;
+      }
     }
-  };
+
+    navigate("/account");
+  } catch (err) {
+    setError(err.message);
+    console.log(err.message);
+  }
+};
+
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -39,30 +52,41 @@ const UserLogin = () => {
 
         <form className="mt-6 space-y-4 px-2 md:px-0" onSubmit={handleSubmit}>
           <div>
-            <Input
+            <input
               type="email"
               name="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className={`${reg.input}`}
             />
           </div>
           <div>
-            <Input
+            <input
               type="password"
               name="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className={`${reg.input}`}
             />
           </div>
-          <Button action="Login" />
+          <button type="submit" className={reg.loginBtnSelected}>
+            Login
+          </button>
         </form>
 
         <div className="mt-4 text-center">
           <p className="text-gray-600">New User? 
             <Link to="/signup" className="text-blue-500 hover:underline ml-1">Sign Up</Link>
           </p>
+        </div>
+        <div className="mt-4 text-center">
+          <button 
+            onClick={() => navigate("/host-login")} 
+            className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+            Are you a host?
+          </button>
         </div>
       </div>
     </div>

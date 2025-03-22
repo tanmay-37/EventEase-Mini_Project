@@ -3,6 +3,10 @@ import reg from "../../styles";
 import LoginUnderline from "../../assets/LoginUnderline.png";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../../context/AuthContext";
+import { auth, db } from "../../firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +22,14 @@ const UserLogin = () => {
 
   try {
     await login(email, password);
+      toast.success("Login successfull!", {
+        position: "top-center",
+        autoClose: 2000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined
+    });
     const user = auth.currentUser;
 
     if (user) {
@@ -26,6 +38,14 @@ const UserLogin = () => {
 
       if (!userSnap.exists()) {
         setError("Unauthorized! Only Users can log in here.");
+              toast.error("Unauthorized! Only Users can log in here.", {
+                position: "bottom-center",
+                autoClose: 2000,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined
+              });
         await logout();
         return;
       }
@@ -35,6 +55,14 @@ const UserLogin = () => {
   } catch (err) {
     setError(err.message);
     console.log(err.message);
+    toast.error(err.message, {
+        position: "bottom-center",
+        autoClose: 2000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined
+      });
   }
 };
 
@@ -47,8 +75,6 @@ const UserLogin = () => {
           <h1 className="text-2xl font-bold">Login</h1>
           <img src={LoginUnderline} alt="Underline" className="w-16 mt-1 self-center" />
         </div>
-
-        {error && <p className="text-red-500">{error}</p>}
 
         <form className="mt-6 space-y-4 px-2 md:px-0" onSubmit={handleSubmit}>
           <div>

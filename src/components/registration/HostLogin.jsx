@@ -5,6 +5,8 @@ import { UserAuth } from "../../context/AuthContext";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import reg from "../../styles"; // ✅ Import shared styles
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const HostLogin = () => {
   const [email, setEmail] = useState("");
@@ -26,8 +28,25 @@ const HostLogin = () => {
         const hostRef = doc(db, "hosts", user.uid);
         const hostSnap = await getDoc(hostRef);
 
+        toast.success("Login successfull!", {
+            position: "top-center",
+            autoClose: 2000,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined
+        });
+
         if (!hostSnap.exists()) {
           setError("Unauthorized! Only Hosts can log in here.");
+            toast.error("Unauthorized! Only Hosts can log in here.", {
+                position: "bottom-center",
+                autoClose: 2000,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined
+            });
           await logout();
           return;
         }
@@ -37,6 +56,14 @@ const HostLogin = () => {
     } catch (err) {
       setError(err.message);
       console.log(err.message);
+      toast.error(err.message, {
+                position: "bottom-center",
+                autoClose: 2000,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined
+            });
     }
   };
 
@@ -50,8 +77,6 @@ const HostLogin = () => {
           <img src={LoginUnderline} alt="Underline" className="w-16 mt-1 self-center" />
         </div>
 
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-center mt-2">{error}</p>}
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="mt-6 space-y-4 px-2 md:px-0">

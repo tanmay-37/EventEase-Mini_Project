@@ -12,7 +12,7 @@ const UserContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [userType, setUserType] = useState(null); // ✅ Store userType
+  const [userType, setUserType] = useState(null); 
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -21,7 +21,7 @@ export const AuthContextProvider = ({ children }) => {
         const userSnap = await getDoc(userRef);
         
         if (userSnap.exists()) {
-          setUserType(userSnap.data().userType); // ✅ Fetch userType
+          setUserType(userSnap.data().userType);
         } else {
           setUserType(null);
         }
@@ -44,7 +44,7 @@ export const AuthContextProvider = ({ children }) => {
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-      setUserType(userSnap.data().userType); // ✅ Set userType on login
+      setUserType(userSnap.data().userType);
     } else {
       setUserType(null);
     }
@@ -53,7 +53,7 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setUserType(null);  // ✅ Clear userType on logout
+    setUserType(null); 
     return signOut(auth);
   };
 

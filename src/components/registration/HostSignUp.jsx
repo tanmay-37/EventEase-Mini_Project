@@ -6,6 +6,9 @@ import { UserAuth } from "../../context/AuthContext";
 import { auth, db } from "../../firebase";
 import { setDoc, doc } from "firebase/firestore";
 
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const HostSignUp = () => {
   const [hostName, setHostName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,10 +38,26 @@ const HostSignUp = () => {
           userType: "Host"
         });
       }
+      toast.success("Host User created successfully!", {
+        position: "top-center",
+        autoClose: 2000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined
+      });
       navigate("/account");
     } catch (err) {
       setError(err.message);
       console.log(err.message);
+      toast.error(err.message, {
+        position: "bottom-center",
+        autoClose: 2000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined
+      });
     }
   };
 
@@ -50,8 +69,6 @@ const HostSignUp = () => {
           <h1 className="text-2xl font-bold">Sign Up</h1>
           <img src={LoginUnderline} alt="Underline" className="w-16 mt-1 self-center" />
         </div>
-
-        {error && <p className="text-red-500 text-center mt-2">{error}</p>}
 
         <form className="mt-6 space-y-4 px-2 md:px-0" onSubmit={handleSubmit}>
           <input type="text" name="hostName" placeholder="Host Name" value={hostName} onChange={(e) => setHostName(e.target.value)} className={`${reg.input}`} />

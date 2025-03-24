@@ -2,7 +2,7 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png'
-import { EventContext } from '../../contexts/EventContext';
+import { EventContext } from '../../context/EventContext';
 
 
 const Navbar = () => {

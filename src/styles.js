@@ -1,4 +1,4 @@
-const login = {
+const reg = {
   loginBtnSelected:
     "w-1/2 bg-[#A084E8] hover:bg-[#8C72D4] text-white font-semibold py-2 rounded-lg transition",
   loginBtnNotSelected:
@@ -7,4 +7,4 @@ const login = {
   input: "w-full p-2 md:p-3 bg-[#E9DAFF] rounded-lg outline-none text-gray-700 placeholder-gray-500 text-sm md:text-base"
 };
 
-export default login;
+export default reg;

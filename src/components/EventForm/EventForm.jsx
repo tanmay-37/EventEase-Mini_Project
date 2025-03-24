@@ -1,96 +1,106 @@
-import { useState} from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useEvents } from '../../context/EventContext'; // import context
+import React, { useState } from 'react';
 
-// event card template details
-const EventForm = () => {
-  const {addEvent} = useEvents(); // get addEvent function from context
-  const navigate = useNavigate();
-
-  const [event, setEvent] = useState({
-    image: '',
-    title: '',
-    description: '',
+const EventForm = ({ addEvent }) => {
+  const [eventData, setEventData] = useState({
+    name: '',
     date: '',
-    venue: '',
-    registrationLink: ''
+    startTime: '',     // Added start time
+    endTime: '',       // Added end time
+    description: '',   // Keep the description field
+    image: ''
   });
-  
-  const [preview, setPreview] = useState(null); // To show image preview
-
 
   const handleChange = (e) => {
-    setEvent({ ...event , [e.target.name] : e.target.value});
-  }
-
-  // Handle Image Upload
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0]; // Get the first selected file
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file); // Convert file to base64
-      reader.onloadend = () => {
-        setEvent({ ...event, image: reader.result }); // Store base64 string
-        setPreview(reader.result); // Show preview
-      };
-    }
+    const { name, value } = e.target;
+    setEventData({ ...eventData, [name]: value });
   };
 
-
-  // handling form submit actions
   const handleSubmit = (e) => {
     e.preventDefault();
-    addEvent(event);
-    console.log('Event Created :' , event);
-    navigate('/'); // Redirect to events page after form submission
+    if (!eventData.name || !eventData.date || !eventData.startTime || !eventData.endTime) {
+      alert("Please fill all the required fields!");
+      return;
+    }
+    addEvent(eventData);
+    setEventData({
+      name: '',
+      date: '',
+      startTime: '',
+      endTime: '',
+      description: '',
+      image: ''
+    });
   };
 
   return (
-
-    <div className="min-h-screen flex justify-center items-center bg-gray-100">
-    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-      <h2 className="text-xl font-bold mb-4">Create New Event</h2>
-
+    <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+      <h2 className="text-2xl font-bold mb-4">Add Event</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-          
-        {/* Image Upload Field */}
-        <label className="block text-sm font-medium text-gray-700">Upload Event Image</label>
-          <input type="file" accept="image/*" onChange={handleImageUpload} 
-            className="w-full p-2 border rounded cursor-pointer" required />
+        <input
+          type="text"
+          name="name"
+          placeholder="Event Name"
+          value={eventData.name}
+          onChange={handleChange}
+          required
+          className="w-full p-2 border rounded"
+        />
 
-          {/* Image Preview */}
-          {preview && <img src={preview} alt="Event Preview" className="w-full h-40 object-cover rounded-md mt-2" />}
+        <input
+          type="date"
+          name="date"
+          value={eventData.date}
+          onChange={handleChange}
+          required
+          className="w-full p-2 border rounded"
+        />
 
+        {/* Start Time */}
+        <input
+          type="time"
+          name="startTime"
+          value={eventData.startTime}
+          onChange={handleChange}
+          required
+          className="w-full p-2 border rounded"
+        />
 
+        {/* End Time */}
+        <input
+          type="time"
+          name="endTime"
+          value={eventData.endTime}
+          onChange={handleChange}
+          required
+          className="w-full p-2 border rounded"
+        />
 
-        <input type="text" name="title" value={event.title} onChange={handleChange}
-          className="w-full p-2 border rounded" placeholder="Enter event title" required />
+        {/* Description field */}
+        <textarea
+          name="description"
+          placeholder="Event Description"
+          value={eventData.description}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+        />
 
-        <textarea name="description" value={event.description} onChange={handleChange}
-          className="w-full p-2 border rounded" placeholder="Enter event description" required />
+        <input
+          type="text"
+          name="image"
+          placeholder="Image URL"
+          value={eventData.image}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+        />
 
-        <input type="date" name="date" value={event.date} onChange={handleChange}
-          className="w-full p-2 border rounded" required />
-
-        <input type="text" name="venue" value={event.venue} onChange={handleChange}
-          className="w-full p-2 border rounded" placeholder="Enter venue" required />
-
-        <input type="text" name="registrationLink" value={event.registrationLink} onChange={handleChange}
-          className="w-full p-2 border rounded" placeholder="Enter registration link" required />
-
-        <div className="flex justify-between">
-          <button type="button" onClick={() => navigate('/events')}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
-            Cancel
-          </button>
-          <button type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            Create Event
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        >
+          Add Event
+        </button>
       </form>
     </div>
-  </div>
   );
 };
 

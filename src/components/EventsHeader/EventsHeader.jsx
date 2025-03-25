@@ -1,65 +1,153 @@
-import React, { useState } from "react";
-import { FiCalendar, FiClock, FiMapPin, FiLink } from "react-icons/fi"; // Import icons
+import React, { useState, useEffect } from "react";
+import { FiCalendar, FiClock, FiMapPin, FiLink } from "react-icons/fi";
+import { collection, addDoc, getDocs,serverTimestamp } from "firebase/firestore";
+import { db} from "../../firebase";    
+import imageCompression from "browser-image-compression";
+
+
+
 
 const EventsHeader = () => {
   const [showForm, setShowForm] = useState(false);
-  const [events, setEvents] = useState([]); // Store event cards
-
   const [eventData, setEventData] = useState({
     image: "",
     title: "",
-    description: "",   // Kept for future detailed pages
+    description: "",
     startDate: "",
     endDate: "",
     startTime: "",
     endTime: "",
-    venue: "",          // Venue field kept
+    venue: "",
     registrationLink: "",
   });
+
+  const [events, setEvents] = useState([]);  
+
+   // Fetch events from Firestore
+   useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "events"));
+        const eventsArray = querySnapshot.docs.map((doc) => ({
+          id: doc.id,          // Add document ID for uniqueness
+          ...doc.data()
+        }));
+        setEvents(eventsArray);   // Store fetched events in state
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
 
   // Handle input change
   const handleChange = (e) => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
 
-  // Handle Image Upload
-  const handleImageUpload = (e) => {
+
+  const MAX_IMAGE_SIZE = 1024 * 1024;  // 1MB
+  const [loading, setLoading] = useState(false);  // ✅ Add loading state
+
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        setEventData({ ...eventData, image: reader.result });
-      };
-    }
-  };
-
-  // Submit event
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!eventData.title || !eventData.startDate || !eventData.startTime || !eventData.venue) {
-      alert("Please fill all required fields!");
+    
+    if (!file) {
+      alert("Please select an image.");
       return;
     }
-
-    setEvents([...events, eventData]);
-    setShowForm(false);
-
-    // Reset form fields
-    setEventData({
-      image: "",
-      title: "",
-      description: "",   
-      startDate: "",
-      endDate: "",
-      startTime: "",
-      endTime: "",
-      venue: "",          // Reset venue field
-      registrationLink: "",
-    });
+  
+    try {
+      setLoading(true);
+  
+      // ✅ Compress the image if larger than 1MB
+      let compressedFile = file;
+      if (file.size > MAX_IMAGE_SIZE) {
+        const options = {
+          maxSizeMB: 1,           // Compress below 1MB
+          maxWidthOrHeight: 1024,  // Resize dimensions
+          useWebWorker: true,
+        };
+        compressedFile = await imageCompression(file, options);
+        console.log(`Original size: ${(file.size / 1024).toFixed(2)} KB`);
+        console.log(`Compressed size: ${(compressedFile.size / 1024).toFixed(2)} KB`);
+      }
+  
+      // ✅ Convert the compressed image to Base64
+      const reader = new FileReader();
+      reader.readAsDataURL(compressedFile);
+  
+      reader.onload = () => {
+        const base64Image = reader.result;
+  
+        // ✅ Check final image size (should be < 1MB)
+        if (base64Image.length > 1000000) {
+          alert("Image is too large even after compression!");
+          return;
+        }
+  
+        // ✅ Store Base64 image in event data
+        setEventData((prev) => ({ ...prev, image: base64Image }));
+        console.log("Image converted to Base64 and ready for Firestore.");
+      };
+  
+      reader.onerror = (error) => {
+        console.error("Error converting image:", error);
+        alert("Failed to convert image!");
+      };
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Failed to upload image!");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // handle submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (loading) {
+      alert("Image is still processing. Please wait...");
+      return;
+    }
+  
+    if (!eventData.image) {
+      alert("Please upload an image before submitting.");
+      return;
+    }
+  
+    try {
+      // ✅ Store Base64 image in Firestore
+      await addDoc(collection(db, "events"), {
+        ...eventData,
+        createdAt: serverTimestamp(),
+      });
+  
+      alert("Event added successfully!");
+      setShowForm(false);
+  
+      // ✅ Reset form
+      setEventData({
+        image: "",
+        title: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        startTime: "",
+        endTime: "",
+        venue: "",
+        registrationLink: "",
+      });
+  
+    } catch (error) {
+      console.error("Error adding event:", error);
+      alert("Failed to add event!");
+    }
+  };
+  
 
   // Utility function to convert 24-hour time to 12-hour format
 const formatTimeTo12Hour = (time) => {
@@ -70,8 +158,6 @@ const formatTimeTo12Hour = (time) => {
   const formattedHour = hour % 12 === 0 ? 12 : hour % 12; // Handle 12 AM and 12 PM correctly
   return `${formattedHour}:${minutes} ${suffix}`;
 };
-
-
 
   return (
     <div className="bg-white shadow-2xl flex flex-col items-center min-h-screen w-full">
@@ -107,10 +193,14 @@ const formatTimeTo12Hour = (time) => {
                 )}
 
                 <div className="p-5">
-                  <h3 className="text-[1vw] font-bold text-gray-800 mb-3">{event.title}</h3>
+
+                  <div className="w-full h-[60px]">
+                    <h3 className="text-[1vw] font-bold text-gray-800 mb-3">{event.title}</h3>
+                  </div>
+                  
 
                   {/* Event Details Line by Line */}
-                  <div className="space-y-2 text-gray-700 flex-grow">
+                  <div className="space-y-2 text-gray-700 flex-grow h-[130px]">
                     <div className="flex items-center gap-2">
                       <FiCalendar className="text-blue-500" />
                       <p>{event.startDate} {event.endDate ? ` - ${event.endDate}` : ""}</p>
@@ -173,10 +263,14 @@ const formatTimeTo12Hour = (time) => {
             <input
               type="file"
               accept="image/*"
+              name = "image"
               onChange={handleImageUpload}
               className="w-full p-2 border rounded"
               required
             />
+
+            {/* Show loading indicator */}
+            {loading && <p className="text-blue-500">Uploading image...</p>}
 
             {/* Image Preview */}
             {eventData.image && (
@@ -186,6 +280,9 @@ const formatTimeTo12Hour = (time) => {
                 className="w-full h-70 object-fill rounded-md mt-2"
               />
             )}
+            <p className="text-gray-500 text-sm">
+                (Max Size of Image = 1 MB.)
+            </p>
 
             <input
               type="text"
@@ -268,9 +365,21 @@ const formatTimeTo12Hour = (time) => {
               required
             />
 
-            <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition">
+            {/* <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition">
               Create Event
-            </button>
+            </button> */}
+
+            <button
+            type="submit"
+            className={`w-full bg-blue-600 text-white p-3 rounded transition hover:cursor-pointer ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
+            disabled={loading}   // ✅ Disable button during upload
+          >
+            {loading ? "Uploading..." : "Create Event"}
+          </button>
+
+
           </form>
         </div>
       )}

@@ -21,7 +21,7 @@ const HeroSection = () => {
   return (
     <section 
     style={{
-        backgroundImage: "url('public/images/doodad.png')",
+        backgroundImage: "url('/images/doodad.png')",
         backgroundSize: "500px",
         backgroundPosition: "left",
         height: "100%",
@@ -52,7 +52,7 @@ const HeroSection = () => {
         {/* Right Column: Image */}
         <div className="flex justify-center">
           <img
-            src="public/images/calendar.png"
+            src="/images/calendar.png"
             alt="Event Planning Illustration"
             className="w-full max-w-md"
           />

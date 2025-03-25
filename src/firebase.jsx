@@ -18,11 +18,10 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-console.log(import.meta.env.VITE_FIREBASE_API_KEY);  // Check if the key logs correctly
-console.log(firebaseConfig);
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = getFirestore(app);  // <-- Firestore instance
 export default app;
+

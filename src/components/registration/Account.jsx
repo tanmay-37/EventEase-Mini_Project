@@ -4,6 +4,7 @@ import { UserAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
+
 const Account = () => {
   const { user, logout } = UserAuth();
   const navigate = useNavigate();

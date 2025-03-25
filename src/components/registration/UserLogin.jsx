@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import reg from "../../styles";
 import LoginUnderline from "../../assets/LoginUnderline.png";
+import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../../context/AuthContext";
-import { auth, db } from "../../firebase";
-import { doc, getDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -14,58 +14,21 @@ const UserLogin = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const { login } = UserAuth();
+  const { login, googleSignIn } = UserAuth();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  try {
-    await login(email, password);
-      toast.success("Login successfull!", {
-        position: "top-center",
-        autoClose: 2000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined
-    });
-    const user = auth.currentUser;
-
-    if (user) {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        setError("Unauthorized! Only Users can log in here.");
-              toast.error("Unauthorized! Only Users can log in here.", {
-                position: "bottom-center",
-                autoClose: 2000,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined
-              });
-        await logout();
-        return;
-      }
+    try {
+      await login(email, password);
+      toast.success("Login successful!", { position: "top-center", autoClose: 2000 });
+      navigate("/account");
+    } catch (err) {
+      setError(err.message);
+      toast.error(err.message, { position: "bottom-center", autoClose: 2000 });
     }
-
-    navigate("/account");
-  } catch (err) {
-    setError(err.message);
-    console.log(err.message);
-    toast.error(err.message, {
-        position: "bottom-center",
-        autoClose: 2000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined
-      });
-  }
-};
-
+  };
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -103,10 +66,21 @@ const UserLogin = () => {
         </form>
 
         <div className="mt-4 text-center">
-          <p className="text-gray-600">New User? 
+          <Link to="/forgot-password" className="text-blue-500 hover:underline">
+            Forgot Password?
+          </Link>
+        </div>
+
+        <div className="m-4 text-center">
+          <p className="text-gray-600">
+            New User?
             <Link to="/signup" className="text-blue-500 hover:underline ml-1">Sign Up</Link>
           </p>
         </div>
+
+        <GoogleSignInButton />
+
+
         <div className="mt-4 text-center">
           <button 
             onClick={() => navigate("/host-login")} 

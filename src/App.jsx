@@ -15,6 +15,7 @@ import EventForm from './components/EventForm/EventForm';
 import { AuthContextProvider } from './context/AuthContext';
 import Account from './components/registration/Account'
 import  ProtectedRoute  from './components/registration/ProtectedRoute'
+import ForgotPassword from './components/registration/ForgotPassword'
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route path="/login" element={<UserLogin />} />
             <Route path="/host-signup" element={<HostSignUp />} />
             <Route path="/host-login" element={<HostLogin />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
             {/* Protected Routes */}
             <Route 

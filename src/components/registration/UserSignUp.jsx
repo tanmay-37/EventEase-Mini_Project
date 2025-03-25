@@ -7,6 +7,8 @@ import { auth, db } from "../../firebase";
 import { setDoc, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GoogleSignInButton from "./GoogleSignInButton";
+
 
 const UserSignUp = () => {
   const [userName, setUserName] = useState("");
@@ -81,11 +83,13 @@ const UserSignUp = () => {
         </form>
 
         {/* Already a user? Login Button */}
-        <div className="mt-4 text-center">
+        <div className="m-4 text-center">
           <p className="text-gray-600">New User? 
             <Link to="/login" className="text-blue-500 hover:underline ml-1">Login</Link>
           </p>
         </div>
+        <GoogleSignInButton />
+
 
         {/* Host Signup Button */}
         <div className="mt-4 text-center">

@@ -28,15 +28,6 @@ const HostLogin = () => {
         const hostRef = doc(db, "hosts", user.uid);
         const hostSnap = await getDoc(hostRef);
 
-        toast.success("Login successfull!", {
-            position: "top-center",
-            autoClose: 2000,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined
-        });
-
         if (!hostSnap.exists()) {
           setError("Unauthorized! Only Hosts can log in here.");
             toast.error("Unauthorized! Only Hosts can log in here.", {

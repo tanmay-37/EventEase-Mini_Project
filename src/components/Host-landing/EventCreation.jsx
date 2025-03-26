@@ -117,7 +117,6 @@ const EventForm = ({ onClose }) => {
         registrationLink: "",
       });
 
-      navigate("/dashboard");
     } catch (error) {
       console.error("Error adding event:", error);
       alert("Failed to add event!");
@@ -187,7 +186,35 @@ const EventForm = ({ onClose }) => {
             onChange={handleChange}
             className="w-full p-2 border rounded"
           />
+          <p className="text-gray-500 text-sm">(If the event is for a single day, ignore the end date.)</p>
         </div>
+
+        <div className="flex justify-between gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">Start Time</label>
+            <input
+              type="time"
+              name="startTime"
+              value={eventData.startTime}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">End Time (Optional)</label>
+            <input
+              type="time"
+              name="endTime"
+              value={eventData.endTime}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+        </div>
+
+        
 
         <input
           type="text"
@@ -208,6 +235,10 @@ const EventForm = ({ onClose }) => {
         </button>
       </form>
       <Logout />
+      <button type="submit" onClick={() => navigate("/dashboard")}>
+          My Hosted Events
+      </button>
+
     </div>
   );
 };

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoginUnderline from "../../assets/LoginUnderline.png"; // ✅ Underline Image
+import LoginUnderline from "../../assets/LoginUnderline.png"; 
 import { UserAuth } from "../../context/AuthContext";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import reg from "../../styles"; // ✅ Import shared styles
+import reg from "../../styles"; 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -43,7 +43,7 @@ const HostLogin = () => {
         }
       }
 
-      navigate("/account");
+      navigate("/event-creation");
     } catch (err) {
       setError(err.message);
       console.log(err.message);

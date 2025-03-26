@@ -20,15 +20,15 @@ useEffect(() => {
   }
 }, [userType, navigate]);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-      console.log('You are logged out');
-    } catch (e) {
-      console.log(e.message);
-    }
-  };
+    const handleLogout = async () => {
+      try {
+        await logout();
+        navigate('/login');
+        console.log('You are logged out');
+      } catch (e) {
+        console.log(e.message);
+      }
+    };
 
   return (
     <div className="max-w-[600px] mx-auto my-16 p-4 text-center">

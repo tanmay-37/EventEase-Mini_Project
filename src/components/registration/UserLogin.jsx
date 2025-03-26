@@ -23,7 +23,7 @@ const UserLogin = () => {
     try {
       await login(email, password);
       toast.success("Login successful!", { position: "top-center", autoClose: 2000 });
-      navigate("/account");
+      navigate("/discover");
     } catch (err) {
       setError(err.message);
       toast.error(err.message, { position: "bottom-center", autoClose: 2000 });

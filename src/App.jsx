@@ -19,6 +19,8 @@ import Account from './components/registration/Account'
 import  ProtectedRoute  from './components/registration/ProtectedRoute'
 import Layout from './components/Layout/Layout.jsx';
 import ForgotPassword from './components/registration/ForgotPassword'
+import Discover from './components/User-landing/Discover'
+import EventCreation from './components/Host-landing/EventCreation.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -39,6 +41,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Home />} />
           </Route>
+          
 
 
             {/* <Route path="/" element={<Home />} /> */}
@@ -55,6 +58,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Account />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/discover" 
+              element={
+                <ProtectedRoute>
+                  <Discover />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/event-creation" 
+              element={
+                <ProtectedRoute>
+                  <EventCreation />
                 </ProtectedRoute>
               } 
             />

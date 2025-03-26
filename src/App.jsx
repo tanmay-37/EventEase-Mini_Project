@@ -18,6 +18,8 @@ import { AuthContextProvider } from './context/AuthContext';
 import Account from './components/registration/Account'
 import  ProtectedRoute  from './components/registration/ProtectedRoute'
 import Layout from './components/Layout/Layout.jsx';
+import EventDetails from './components/EventDetails/EventDetails.jsx';
+import EventRegistration from './components/EventRegistration/EventRegistration.jsx';
 
 
 
@@ -42,13 +44,14 @@ function App() {
             <Route path="/events" element={<Home />} />
           </Route>
 
-
-            {/* <Route path="/" element={<Home />} /> */}
             <Route path="/events" element={<EventsHeader/>} />
             <Route path="/signup" element={<UserSignUp />} />
             <Route path="/login" element={<UserLogin />} />
             <Route path="/host-signup" element={<HostSignUp />} />
             <Route path="/host-login" element={<HostLogin />} />
+            <Route path="/event/:id" element={<EventDetails />} />  {/* Event details page */}
+            <Route path="/event/:id/register" element={<EventRegistration />} /> {/* Event registration Form */}
+            
 
             {/* Protected Routes */}
             <Route 

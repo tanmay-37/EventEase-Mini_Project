@@ -3,10 +3,12 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  sendPasswordResetEmail ,
+  signInWithPopup
 } from "firebase/auth";
-import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { auth, db, googleProvider } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const UserContext = createContext();
 
@@ -52,13 +54,51 @@ export const AuthContextProvider = ({ children }) => {
     return userCredential;
   };
 
+  const googleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Check if user already exists in Firestore
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        // If new user, save to Firestore
+        await setDoc(userRef, { 
+          email: user.email, 
+          userType: "user"
+        });
+        setUserType("user");
+      } else {
+        setUserType(userSnap.data().userType);
+      }
+      
+      return user;
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      throw error;
+    }
+  };
+
+  const resetPassword = async (email) => {
+  try {
+    console.log("Firebase Reset Function Called for:", email);
+    return await sendPasswordResetEmail(auth, email);
+  } catch (error) {
+    console.error("Firebase Password Reset Error:", error.code, error.message);
+    throw error;
+  }
+};
+
+
   const logout = () => {
     setUserType(null); 
     return signOut(auth);
   };
 
   return (
-    <UserContext.Provider value={{ createUser, user, userType, login, logout }}>
+    <UserContext.Provider value={{ createUser, user, userType, login, logout, googleSignIn, resetPassword  }}>
       {children}
     </UserContext.Provider>
   );

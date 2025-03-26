@@ -20,8 +20,7 @@ import  ProtectedRoute  from './components/registration/ProtectedRoute'
 import Layout from './components/Layout/Layout.jsx';
 import EventDetails from './components/EventDetails/EventDetails.jsx';
 import EventRegistration from './components/EventRegistration/EventRegistration.jsx';
-
-
+import ForgotPassword from './components/registration/ForgotPassword'
 
 
 function App() {
@@ -51,7 +50,8 @@ function App() {
             <Route path="/host-login" element={<HostLogin />} />
             <Route path="/event/:id" element={<EventDetails />} />  {/* Event details page */}
             <Route path="/event/:id/register" element={<EventRegistration />} /> {/* Event registration Form */}
-            
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+
 
             {/* Protected Routes */}
             <Route 

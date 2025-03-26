@@ -21,6 +21,7 @@ import Layout from './components/Layout/Layout.jsx';
 import ForgotPassword from './components/registration/ForgotPassword'
 import Discover from './components/User-landing/Discover'
 import EventCreation from './components/Host-landing/EventCreation.jsx';
+import Dashboard from './components/Host-landing/Dashboard.jsx'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -51,6 +52,7 @@ function App() {
             <Route path="/host-signup" element={<HostSignUp />} />
             <Route path="/host-login" element={<HostLogin />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/dashboard" element={<Dashboard />} />
 
             {/* Protected Routes */}
             <Route 

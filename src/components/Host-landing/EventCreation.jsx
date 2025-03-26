@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase";
 import imageCompression from "browser-image-compression";
+import { UserAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import Logout from '../Logout';
 
 const EventForm = ({ onClose }) => {
+  const { userId } = UserAuth(); 
+  const navigate = useNavigate();
   const [eventData, setEventData] = useState({
     image: "",
     title: "",
@@ -71,49 +75,54 @@ const EventForm = ({ onClose }) => {
     }
   };
 
-const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleSubmit = async (e) => {
+    console.log("User ID Set:", userId);
+    e.preventDefault();
 
-        if (loading) {
-            alert("Image is still processing. Please wait...");
-            return;
-        }
+    if (loading) {
+      alert("Image is still processing. Please wait...");
+      return;
+    }
 
-        if (!eventData.image) {
-            alert("Please upload an image before submitting.");
-            return;
-        }
+    if (!eventData.image) {
+      alert("Please upload an image before submitting.");
+      return;
+    }
 
-        try {
-            console.log("Attempting to add event...");
-            await addDoc(collection(db, "events"), {
-                ...eventData,
-                createdAt: serverTimestamp(),
-            });
+    if (!userId) {
+      alert("User not logged in. Please log in to create an event.");
+      return;
+    }
 
-            console.log("Event added successfully!");
-            alert("Event added successfully!");
+    try {
+      console.log("Attempting to add event...");
+      await addDoc(collection(db, "events"), {
+        ...eventData,
+        userId, 
+        createdAt: serverTimestamp(),
+      });
 
-            setEventData({image: "",
-                          title: "",
-                          description: "",
-                          startDate: "",
-                          endDate: "",
-                          startTime: "",
-                          endTime: "",
-                          venue: "",
-                          registrationLink: ""
-                        });
+      console.log("Event added successfully!");
+      alert("Event added successfully!");
 
-            //onClose(); // Comment out onClose() temporarily
-        } catch (error) {
-            console.log("Catch block reached");
-            console.error("Error adding event:", error);
-            //alert("Failed to add event!"); // Comment out alert temporarily
-            console.log("Catch block executed. error message: ", error.message)
-            return;
-        }
-    };
+      setEventData({
+        image: "",
+        title: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        startTime: "",
+        endTime: "",
+        venue: "",
+        registrationLink: "",
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error adding event:", error);
+      alert("Failed to add event!");
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mt-6">
@@ -178,33 +187,6 @@ const handleSubmit = async (e) => {
             onChange={handleChange}
             className="w-full p-2 border rounded"
           />
-
-          <p className="text-gray-500 text-sm">(If the event is for a single day, ignore the end date.)</p>
-        </div>
-
-        <div className="flex justify-between gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">Start Time</label>
-            <input
-              type="time"
-              name="startTime"
-              value={eventData.startTime}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">End Time (Optional)</label>
-            <input
-              type="time"
-              name="endTime"
-              value={eventData.endTime}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
         </div>
 
         <input
@@ -219,9 +201,7 @@ const handleSubmit = async (e) => {
 
         <button
           type="submit"
-          className={`w-full bg-blue-600 text-white p-3 rounded transition hover:cursor-pointer ${
-            loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
-          }`}
+          className={`w-full bg-blue-600 text-white p-3 rounded transition hover:cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`}
           disabled={loading}
         >
           {loading ? "Uploading..." : "Create Event"}

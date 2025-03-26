@@ -16,14 +16,15 @@ export const AuthContextProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userType, setUserType] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [userId, setUserId] = useState(null); //add userID state
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             console.log("Auth State Changed:", currentUser);
             if (currentUser) {
                 setUser(currentUser);
-                setUserId(currentUser.uid); //set UserId
+                setUserId(currentUser.uid);
+                console.log("User ID Set:", currentUser.uid);
                 const userRef = doc(db, "users", currentUser.uid);
                 const hostRef = doc(db, "hosts", currentUser.uid);
                 const userSnap = await getDoc(userRef);
@@ -39,7 +40,7 @@ export const AuthContextProvider = ({ children }) => {
             } else {
                 setUser(null);
                 setUserType(null);
-                setUserId(null); //clear userId
+                setUserId(null); 
             }
             setLoading(false);
         });
@@ -49,6 +50,10 @@ export const AuthContextProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log("User Logged In - UID:", user.uid); 
+        setUser(user);
+        setUserId(user.uid);
         return userCredential;
     };
     const createUser = (email, password) => {

@@ -4,11 +4,7 @@ import { collection, addDoc, getDocs,serverTimestamp } from "firebase/firestore"
 import { db} from "../../firebase";    
 import imageCompression from "browser-image-compression";
 import { useNavigate } from "react-router-dom";  // Import for navigation
-
-
-
-
-
+  
 const EventsHeader = () => {
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();

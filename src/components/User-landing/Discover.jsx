@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, orderBy, limit, doc, updateDoc, increment } from "firebase/firestore";
 import { useDebounce } from "react-use";
 import { db } from "../../firebase";
-import EventCard from "./Card";
+import EventCard from "../Card";
 import Logout from '../Logout';
 import Search from '../Search';
-import Spinner from './Spinner';
+import Spinner from '../Spinner';
 
 const Discover = () => {
   const [allEvents, setAllEvents] = useState([]); 
@@ -16,7 +16,6 @@ const Discover = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-  // Debounce search term
   useDebounce(
     () => {
       setDebouncedSearchTerm(searchTerm);
@@ -25,7 +24,6 @@ const Discover = () => {
     [searchTerm]
   );
 
-  // Track search count for an event
   const trackSearch = async (eventId) => {
     try {
       const eventRef = doc(db, "events", eventId);
@@ -37,14 +35,12 @@ const Discover = () => {
     }
   };
 
-  // Fetch all events
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
       setErrorMessage('');
       
       try {
-        // Fetch all events sorted by searchCount
         const eventsQuery = query(
           collection(db, "events"),
           orderBy("searchCount", "desc")
@@ -59,7 +55,6 @@ const Discover = () => {
         setAllEvents(eventsArray);
         setFilteredEvents(eventsArray);
 
-        // Get top 5 most searched events
         const trending = eventsArray.slice(0, 5);
         setTrendingEvents(trending);
       } catch (error) {
@@ -73,32 +68,67 @@ const Discover = () => {
     fetchEvents();
   }, []);
 
-  // Filter events based on search term
-  useEffect(() => {
-    if (debouncedSearchTerm) {
-      const queryLower = debouncedSearchTerm.toLowerCase();
-      const filtered = allEvents.filter(event => 
-        event.title.toLowerCase().includes(queryLower) ||
-        (event.description && event.description.toLowerCase().includes(queryLower))
-      );
-      
-      // Track search for each matching event
-      filtered.forEach(event => {
-        trackSearch(event.id);
-      });
-      
-      setFilteredEvents(filtered);
-      
-      if (filtered.length === 0) {
-        setErrorMessage("No events match your search.");
-      } else {
-        setErrorMessage("");
-      }
+useEffect(() => {
+  const fetchEvents = async () => {
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      // Fetch all events from Firestore
+      const eventsQuery = collection(db, "events");
+      const eventsSnapshot = await getDocs(eventsQuery);
+
+      const eventsArray = eventsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setAllEvents(eventsArray);
+      setFilteredEvents(eventsArray); // Ensure filteredEvents starts with all events
+
+      // Sort and get top 5 trending events
+      const trending = [...eventsArray]
+        .sort((a, b) => (b.searchCount || 0) - (a.searchCount || 0))
+        .slice(0, 5);
+
+      setTrendingEvents(trending);
+    } catch (error) {
+      console.error("Firestore Error:", error);
+      setErrorMessage("Failed to load events. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEvents();
+}, []);
+
+useEffect(() => {
+  if (!debouncedSearchTerm) {
+    setFilteredEvents(allEvents);
+    setErrorMessage("");
+  } else {
+    const queryLower = debouncedSearchTerm.toLowerCase();
+    const filtered = allEvents.filter(event =>
+      event.title.toLowerCase().includes(queryLower) ||
+      (event.description && event.description.toLowerCase().includes(queryLower))
+    );
+
+    filtered.forEach(event => trackSearch(event.id));
+
+    setFilteredEvents(filtered);
+
+    if (filtered.length === 0) {
+      setErrorMessage("No events match your search.");
     } else {
-      setFilteredEvents(allEvents);
       setErrorMessage("");
     }
-  }, [debouncedSearchTerm, allEvents]);
+  }
+}, [debouncedSearchTerm, allEvents]); 
+
+
+
+
 
   return (
     <div className="min-h-screen bg-[#F5F0FF] relative overflow-visible"

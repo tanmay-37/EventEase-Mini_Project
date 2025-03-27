@@ -46,7 +46,7 @@ const HostSignUp = () => {
         draggable: true,
         progress: undefined
       });
-      navigate("/account");
+      navigate("/host-dashboard");
     } catch (err) {
       setError(err.message);
       console.log(err.message);

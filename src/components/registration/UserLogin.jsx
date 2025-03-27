@@ -3,6 +3,8 @@ import reg from "../../styles";
 import LoginUnderline from "../../assets/LoginUnderline.png";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
+import { auth, db } from "../../firebase";
+import { doc, getDoc } from "firebase/firestore"; 
 import { UserAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,6 +24,25 @@ const UserLogin = () => {
 
     try {
       await login(email, password);
+      const user = auth.currentUser;
+
+            if (user) {
+        // Check if the user exists in the 'hosts' collection
+        const hostRef = doc(db, "hosts", user.uid);
+        const hostSnap = await getDoc(hostRef);
+
+        if (hostSnap.exists()) {
+          // If the user is a host, prevent login as a user
+          setError("Hosts cannot log in as users.");
+          toast.error("Hosts cannot log in as users.", {
+            position: "bottom-center",
+            autoClose: 2000,
+          });
+          // await logout();
+          return;
+        }
+      }
+
       toast.success("Login successful!", { position: "top-center", autoClose: 2000 });
       navigate("/discover");
     } catch (err) {

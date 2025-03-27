@@ -1,6 +1,9 @@
 import React from "react";
 import { FiCalendar, FiClock, FiMapPin } from "react-icons/fi";
 import EventOverlay from "./EventOverlay";
+import { UserAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { FiUsers } from "react-icons/fi";
 
 const formatTimeTo12Hour = (time) => {
   if (!time) return "";
@@ -12,6 +15,11 @@ const formatTimeTo12Hour = (time) => {
 };
 
 const EventCard = ({ event }) => {
+  const { user, userType } = UserAuth();
+  const navigate = useNavigate();
+
+  const isHost = userType === "host";
+
   return (
     <div
       className="relative w-full max-w-[350px] bg-white shadow-lg rounded-lg 
@@ -27,16 +35,15 @@ const EventCard = ({ event }) => {
       )}
 
       <div className="p-4 flex flex-col h-full">
-        {/* Event Title (Fades in on Hover for Desktop) */}
         <h3
           className="text-lg font-bold text-gray-800 mb-2 h-[50px] overflow-hidden 
                      opacity-50 group-hover:opacity-100 transition-opacity duration-300"
         >
           {event.title}
         </h3>
-
-        {/* Event details container */}
-        <div className="space-y-2 text-gray-700 flex-grow min-h-[100px]">
+        
+        {!isHost && (
+          <div className="space-y-2 text-gray-700 flex-grow min-h-[100px]">
           <div className="flex items-center gap-2">
             <FiCalendar className="text-blue-500" />
             <p className="text-sm">
@@ -54,23 +61,37 @@ const EventCard = ({ event }) => {
             <FiMapPin className="text-red-500" />
             <p className="text-sm">{event.venue}</p>
           </div>
-        {/* Register Button (Visible on Mobile) */}
-        <button
-          className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg 
-                     text-center text-sm font-semibold md:hidden"
-          onClick={() => alert("Register functionality to be implemented!")}
-        >
-          Register Now
-        </button>
+      </div>
+        )}
+        {isHost && (
+                  <div className="flex items-center gap-2 text-gray-700 mt-4">
+                    <FiUsers className="text-purple-500 text-lg" />
+                    <p className="text-lg font-semibold">
+                      {event.registrations ?? 0} {event.registrations === 1 ? "Registration" : "Registrations"}
+                    </p>
+                  </div>
+                )}
+
+          {/* Register Button (Visible on Mobile for Users) */}
+          
+            <button
+              className="mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 
+                   font-semibold py-2 px-6 text-lg rounded-lg shadow-md 
+                   hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] 
+                   transition-all duration-300 md:hidden"
+              onClick={() => navigate(`/event-details/${event.id}`)}
+            >
+              Register Now
+            </button>
         </div>
 
-      </div>
-
-      {/* Event Overlay (Visible on Hover for Desktop) */}
+      {/* Event Overlay */}
       <div className="hidden md:block">
         <EventOverlay
           title={event.title}
-          onRegister={() => alert("Register functionality to be implemented!")}
+          isHost={isHost}
+          onRegister={() => navigate(`/event-details/${event.id}`)}
+          onViewDetails={() => navigate(`/event-details/${event.id}`)}
         />
       </div>
     </div>

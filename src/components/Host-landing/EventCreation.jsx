@@ -4,7 +4,6 @@ import { db } from "../../firebase";
 import imageCompression from "browser-image-compression";
 import { UserAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Logout from '../Logout';
 
 const EventForm = ({ onClose }) => {
   const { userId } = UserAuth(); 
@@ -29,46 +28,24 @@ const EventForm = ({ onClose }) => {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-
-    if (!file) {
-      alert("Please select an image.");
-      return;
-    }
+    if (!file) return alert("Please select an image.");
 
     try {
       setLoading(true);
-
       let compressedFile = file;
       if (file.size > 1024 * 1024) {
-        const options = {
+        compressedFile = await imageCompression(file, {
           maxSizeMB: 1,
           maxWidthOrHeight: 1024,
           useWebWorker: true,
-        };
-        compressedFile = await imageCompression(file, options);
+        });
       }
 
       const reader = new FileReader();
       reader.readAsDataURL(compressedFile);
-
-      reader.onload = () => {
-        const base64Image = reader.result;
-
-        if (base64Image.length > 1000000) {
-          alert("Image is too large even after compression!");
-          return;
-        }
-
-        setEventData((prev) => ({ ...prev, image: base64Image }));
-        console.log("Image converted to Base64 and ready for Firestore.");
-      };
-
-      reader.onerror = (error) => {
-        console.error("Error converting image:", error);
-        alert("Failed to convert image!");
-      };
-    } catch (error) {
-      console.error("Error uploading image:", error);
+      reader.onload = () => setEventData((prev) => ({ ...prev, image: reader.result }));
+      reader.onerror = () => alert("Failed to convert image!");
+    } catch {
       alert("Failed to upload image!");
     } finally {
       setLoading(false);
@@ -76,169 +53,60 @@ const EventForm = ({ onClose }) => {
   };
 
   const handleSubmit = async (e) => {
-    console.log("User ID Set:", userId);
     e.preventDefault();
-
-    if (loading) {
-      alert("Image is still processing. Please wait...");
-      return;
-    }
-
-    if (!eventData.image) {
-      alert("Please upload an image before submitting.");
-      return;
-    }
-
-    if (!userId) {
-      alert("User not logged in. Please log in to create an event.");
-      return;
-    }
-
+    if (loading) return alert("Image is still processing. Please wait...");
+    if (!eventData.image || !userId) return alert("Please complete all fields.");
     try {
-      console.log("Attempting to add event...");
-      await addDoc(collection(db, "events"), {
-        ...eventData,
-        userId, 
-        createdAt: serverTimestamp(),
-      });
-
-      console.log("Event added successfully!");
+      await addDoc(collection(db, "events"), { ...eventData, userId, createdAt: serverTimestamp() });
       alert("Event added successfully!");
-
-      setEventData({
-        image: "",
-        title: "",
-        description: "",
-        startDate: "",
-        endDate: "",
-        startTime: "",
-        endTime: "",
-        venue: "",
-        registrationLink: "",
-      });
-
-    } catch (error) {
-      console.error("Error adding event:", error);
+      setEventData({ image: "", title: "", description: "", startDate: "", endDate: "", startTime: "", endTime: "", venue: "", registrationLink: "" });
+    } catch {
       alert("Failed to add event!");
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mt-6">
-      <h2 className="text-xl font-bold mb-4">Create New Event</h2>
-
+    <div className="bg-white p-6 rounded-2xl shadow-xl max-w-lg mx-auto mt-10 border border-gray-200">
+      <h2 className="text-2xl font-semibold mb-4 text-gray-800 text-center">Create New Event</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block text-sm font-medium text-gray-700">Upload Event Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          name="image"
-          onChange={handleImageUpload}
-          className="w-full p-2 border rounded"
-          required
-        />
+        <input type="file" accept="image/*" name="image" onChange={handleImageUpload} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all" required />
+        {loading && <p className="text-blue-500 text-center">Uploading image...</p>}
+        {eventData.image && <img src={eventData.image} alt="Preview" className="w-full rounded-lg mt-2 shadow-md" />}
+        <p className="text-gray-500 text-sm text-center">(Max Size: 1 MB)</p>
 
-        {loading && <p className="text-blue-500">Uploading image...</p>}
+        <input type="text" name="title" value={eventData.title} onChange={handleChange} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 focus:outline-none" placeholder="Event title" required />
+        <textarea name="description" value={eventData.description} onChange={handleChange} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 focus:outline-none" placeholder="Event description" />
 
-        {eventData.image && (
-          <img
-            src={eventData.image}
-            alt="Preview"
-            className="w-full h-70 object-fill rounded-md mt-2"
-          />
-        )}
-        <p className="text-gray-500 text-sm">(Max Size of Image = 1 MB.)</p>
-
-        <input
-          type="text"
-          name="title"
-          value={eventData.title}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          placeholder="Enter event title"
-          required
-        />
-
-        <textarea
-          name="description"
-          value={eventData.description}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          placeholder="Enter event description (for future detail page)"
-        />
-
-        <div className="flex flex-col gap-2">
-          <label className="block text-sm font-medium text-gray-700">Start Date</label>
-          <input
-            type="date"
-            name="startDate"
-            value={eventData.startDate}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-
-          <label className="block text-sm font-medium text-gray-700">End Date (Optional)</label>
-          <input
-            type="date"
-            name="endDate"
-            value={eventData.endDate}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-          <p className="text-gray-500 text-sm">(If the event is for a single day, ignore the end date.)</p>
-        </div>
-
-        <div className="flex justify-between gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">Start Time</label>
-            <input
-              type="time"
-              name="startTime"
-              value={eventData.startTime}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-700">Start Date</label>
+            <input type="date" name="startDate" value={eventData.startDate} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all" required />
           </div>
-
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">End Time (Optional)</label>
-            <input
-              type="time"
-              name="endTime"
-              value={eventData.endTime}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
+          <div>
+            <label className="text-sm font-medium text-gray-700">End Date</label>
+            <input type="date" name="endDate" value={eventData.endDate} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all" />
           </div>
         </div>
 
-        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-gray-700">Start Time</label>
+            <input type="time" name="startTime" value={eventData.startTime} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all" required />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700">End Time</label>
+            <input type="time" name="endTime" value={eventData.endTime} onChange={handleChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all" />
+          </div>
+        </div>
 
-        <input
-          type="text"
-          name="venue"
-          value={eventData.venue}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          placeholder="Enter venue"
-          required
-        />
+        <input type="text" name="venue" value={eventData.venue} onChange={handleChange} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 focus:outline-none" placeholder="Venue" required />
 
-        <button
-          type="submit"
-          className={`w-full bg-blue-600 text-white p-3 rounded transition hover:cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`}
-          disabled={loading}
-        >
-          {loading ? "Uploading..." : "Create Event"}
-        </button>
+        <button type="submit" className={`mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white font-semibold py-2 px-6 text-lg rounded-lg shadow-md hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] transition-all duration-300 w-full ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`} disabled={loading}>{loading ? "Uploading..." : "Create Event"}</button>
       </form>
-      <Logout />
-      <button type="submit" onClick={() => navigate("/dashboard")}>
-          My Hosted Events
-      </button>
 
+      <div className="flex justify-between items-center mt-4">
+      </div>
     </div>
   );
 };

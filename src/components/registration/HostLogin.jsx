@@ -42,8 +42,8 @@ const HostLogin = () => {
           return;
         }
       }
-
-      navigate("/event-creation");
+      toast.success("Login successful!", { position: "top-center", autoClose: 2000 });
+      navigate("/host-dashboard");
     } catch (err) {
       setError(err.message);
       console.log(err.message);

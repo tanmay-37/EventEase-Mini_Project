@@ -3,12 +3,16 @@ import { FiCalendar, FiClock, FiMapPin, FiLink } from "react-icons/fi";
 import { collection, addDoc, getDocs,serverTimestamp } from "firebase/firestore";
 import { db} from "../../firebase";    
 import imageCompression from "browser-image-compression";
+import { useNavigate } from "react-router-dom";  // Import for navigation
+
 
 
 
 
 const EventsHeader = () => {
   const [showForm, setShowForm] = useState(false);
+  const navigate = useNavigate();
+  
   const [eventData, setEventData] = useState({
     image: "",
     title: "",
@@ -236,14 +240,13 @@ const formatTimeTo12Hour = (time) => {
 
                   {/* Explore/Register Button */}
                   <div className="flex justify-end items-end mt-4">
-                  <a
-                    href={event.registrationLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full text-center  bg-purple-600 text-white hover:bg-purple-800 px-4 py-2 rounded  transition"
-                  >
-                    Explore/Register
-                  </a>
+
+                    <button
+                      onClick={() => navigate(`/event/${event.id}`)}   // Navigate to event details
+                      className="bg-purple-600 text-white hover:bg-purple-800 px-4 py-2 rounded transition w-full text-center cursor-pointer"
+                    >
+                      Register
+                    </button>
                 </div>
                 </div>
               </div>

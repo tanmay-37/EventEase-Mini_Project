@@ -9,7 +9,7 @@ const HostDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const { user } = UserAuth(); // Get logged-in user info
+  const { user } = UserAuth(); 
 
   useEffect(() => {
     if (!user) return;

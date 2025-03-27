@@ -16,9 +16,14 @@ import { AuthContextProvider } from './context/AuthContext';
 import Account from './components/registration/Account';
 import ProtectedRoute from './components/registration/ProtectedRoute';
 import Layout from './components/Layout/Layout.jsx';
+
+import ForgotPassword from './components/registration/ForgotPassword'
+import Discover from './components/User-landing/Discover'
+import EventCreation from './components/Host-landing/EventCreation.jsx';
+import Dashboard from './components/Host-landing/Dashboard.jsx'
 import EventDetails from './components/EventDetails/EventDetails.jsx';
 import EventRegistration from './components/EventRegistration/EventRegistration.jsx';
-import ForgotPassword from './components/registration/ForgotPassword';
+
 
 function App() {
   return (    
@@ -28,10 +33,14 @@ function App() {
         <AuthContextProvider>
           <ToastContainer />
           <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/events" element={<Home />} />
-            </Route>
+
+
+            {/* Group Home + EventsHeader inside Layout */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/events" element={<Home />} />
+          </Route>
+          
             <Route path="/events" element={<EventsHeader/>} />
             <Route path="/signup" element={<UserSignUp />} />
             <Route path="/login" element={<UserLogin />} />
@@ -40,11 +49,32 @@ function App() {
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/event/:id/register" element={<EventRegistration />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+
+            {/* Protected Routes */}
+
             <Route 
               path="/account" 
               element={
                 <ProtectedRoute>
                   <Account />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route 
+              path="/discover" 
+              element={
+                <ProtectedRoute>
+                  <Discover />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/event-creation" 
+              element={
+                <ProtectedRoute>
+                  <EventCreation />
                 </ProtectedRoute>
               } 
             />

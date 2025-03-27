@@ -1,9 +1,6 @@
-// Import the necessary functions from the Firebase SDKs
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Firebase configuration using environment variables
 const firebaseConfig = {
@@ -16,12 +13,18 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
-export default app;
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Firebase Auth Persistence Set to Local Storage");
+    // Optional: Check if user exists after setting persistence
+    console.log("Current user:", auth.currentUser);
+  })
+  .catch((error) => console.error("Persistence Error:", error));
 
+export default app;

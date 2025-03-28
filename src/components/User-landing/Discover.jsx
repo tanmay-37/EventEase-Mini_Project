@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, query, orderBy, doc, updateDoc, increment } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  increment
+} from "firebase/firestore";
 import { useDebounce } from "react-use";
 import { db } from "../../firebase";
 import Logout from "../Logout";
@@ -16,7 +24,7 @@ const Discover = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Debounce search term
+  // Debounce search term to reduce unnecessary filtering
   useDebounce(
     () => {
       setDebouncedSearchTerm(searchTerm);
@@ -29,73 +37,76 @@ const Discover = () => {
   const trackSearch = async (eventId) => {
     try {
       const eventRef = doc(db, "events", eventId);
-      await updateDoc(eventRef, {
-        searchCount: increment(1),
-      });
+      await updateDoc(eventRef, { searchCount: increment(1) });
     } catch (error) {
       console.error("Error tracking search:", error);
     }
   };
 
-  // Fetch all events
+  // Fetch all events with real-time updates
   useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      setErrorMessage("");
+    setLoading(true);
+    setErrorMessage("");
 
-      try {
-        const eventsQuery = query(
-          collection(db, "events"),
-          orderBy("searchCount", "desc")
-        );
+    // Modified query to handle cases where searchCount might not exist
+    const eventsQuery = query(collection(db, "events"));
 
-        const eventsSnapshot = await getDocs(eventsQuery);
-        const eventsArray = eventsSnapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(
+      eventsQuery,
+      (snapshot) => {
+        const eventsArray = snapshot.docs.map((doc) => ({
           id: doc.id,
+          searchCount: doc.data().searchCount || 0, // Default to 0 if missing
           ...doc.data(),
         }));
 
+        console.log("Fetched Events:", eventsArray); // Debug log
+
+        if (eventsArray.length === 0) {
+          setErrorMessage("No events found.");
+        } else {
+          setErrorMessage("");
+        }
+
         setAllEvents(eventsArray);
         setFilteredEvents(eventsArray);
-
-        // Get top 5 trending events
-        const trending = eventsArray.slice(0, 5);
+        
+        // Create trending events by sorting by searchCount
+        const trending = [...eventsArray]
+          .sort((a, b) => b.searchCount - a.searchCount)
+          .slice(0, 5);
         setTrendingEvents(trending);
-      } catch (error) {
+        
+        setLoading(false);
+      },
+      (error) => {
         console.error("Firestore Error:", error);
         setErrorMessage("Failed to load events. Please try again.");
-      } finally {
         setLoading(false);
       }
-    };
+    );
 
-    fetchEvents();
+    return () => unsubscribe(); // Cleanup listener on unmount
   }, []);
 
   // Filter events based on search term
   useEffect(() => {
     if (!debouncedSearchTerm) {
       setFilteredEvents(allEvents);
-      setErrorMessage("");
-    } else {
-      const queryLower = debouncedSearchTerm.toLowerCase();
-      const filtered = allEvents.filter(
-        (event) =>
-          event.title.toLowerCase().includes(queryLower) ||
-          (event.description &&
-            event.description.toLowerCase().includes(queryLower))
-      );
-
-      filtered.forEach((event) => trackSearch(event.id));
-
-      setFilteredEvents(filtered);
-
-      if (filtered.length === 0) {
-        setErrorMessage("No events match your search.");
-      } else {
-        setErrorMessage("");
-      }
+      setErrorMessage(allEvents.length === 0 ? "No events found." : "");
+      return;
     }
+
+    const queryLower = debouncedSearchTerm.toLowerCase();
+    const filtered = allEvents.filter(
+      (event) =>
+        event.title.toLowerCase().includes(queryLower) ||
+        (event.description && 
+         event.description.toLowerCase().includes(queryLower))
+    );
+
+    setFilteredEvents(filtered);
+    setErrorMessage(filtered.length === 0 ? "No events match your search." : "");
   }, [debouncedSearchTerm, allEvents]);
 
   return (
@@ -119,6 +130,7 @@ const Discover = () => {
             </div>
           </div>
 
+          {/* Trending Events */}
           {trendingEvents.length > 0 && (
             <section className="mt-20">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -140,7 +152,7 @@ const Discover = () => {
                       {index + 1}
                     </p>
                     <img
-                      src={event.image}
+                      src={event.image || '/images/event-placeholder.jpg'}
                       alt={event.title}
                       className="w-[170px] h-[200px] rounded-lg object-cover -ml-3.5 z-10"
                     />
@@ -168,13 +180,18 @@ const Discover = () => {
                   <div
                     key={event.id}
                     className="transition-transform duration-300 hover:scale-[1.02]"
+                    onClick={() => trackSearch(event.id)}
                   >
-                    <EventCard event={event} />
+                    <EventCard 
+                      event={event} 
+                      image={event.image || '/images/event-placeholder.jpg'}
+                    />
                   </div>
                 ))}
               </div>
             )}
           </section>
+
           <Logout />
         </section>
       </div>

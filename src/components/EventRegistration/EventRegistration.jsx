@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, runTransaction, doc, increment } from "firebase/firestore";
 import { db } from "../../firebase";
 import { getAuth } from "firebase/auth";
 import { useNavigate, useParams } from "react-router-dom";
 
 const EventRegistration = () => {
   const navigate = useNavigate();
-  const { id: eventId } = useParams(); // Extract eventId from route params
+  const { id: eventId } = useParams();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -46,43 +46,62 @@ const EventRegistration = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    const auth = getAuth();
-    const user = auth.currentUser;
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!user) {
-      alert("You must be logged in to register for this event.");
-      return;
-    }
+  const auth = getAuth();
+  const user = auth.currentUser;
 
-    if (!eventId) {
-      console.error("Invalid eventId:", eventId);
-      alert("Invalid Event ID. Please try again.");
-      return;
-    }
+  if (!user) {
+    alert("You must be logged in to register for this event.");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  if (!eventId) {
+    console.error("Invalid eventId:", eventId);
+    alert("Invalid Event ID. Please try again.");
+    return;
+  }
 
-      const registrationData = {
+  try {
+    setLoading(true);
+
+    // Firestore document references
+    const eventRef = doc(db, "events", eventId);
+    const registrationsRef = collection(db, "registrations");
+
+    // Firestore transaction for atomic updates
+    await runTransaction(db, async (transaction) => {
+      // Get event document
+      const eventDoc = await transaction.get(eventRef);
+
+      if (!eventDoc.exists()) {
+        throw new Error("Event does not exist.");
+      }
+
+      // Add registration entry
+      await addDoc(registrationsRef, {
         ...formData,
-        eventId, // Add eventId dynamically from route
+        eventId,
         userId: user.uid,
         createdAt: serverTimestamp(),
-      };
+      });
 
-      await addDoc(collection(db, "registrations"), registrationData);
-      alert("Registered successfully!");
-      navigate(`/event/${eventId}`);
-    } catch (error) {
-      console.error("Error registering:", error);
-      alert("Failed to register. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      // Increment registration count in event document
+      transaction.update(eventRef, { registrationCount: increment(1) });
+    });
+
+    alert("Registered successfully!");
+    navigate(`/event-details/${eventId}`)
+  } catch (error) {
+    console.error("Error registering:", error);
+    alert("Failed to register. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div

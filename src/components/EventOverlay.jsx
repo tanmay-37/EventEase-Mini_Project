@@ -1,16 +1,10 @@
 import React from "react";
-import EventDetails from "./EventDetails/EventDetails";
 import { useNavigate } from "react-router-dom";
 
+const EventOverlay = ({ title, isHost, isRegistered, onRegister, onViewDetails, id }) => {
+  const navigate = useNavigate();
 
-const EventOverlay = ({ title, isHost, onRegister, onViewDetails , id }) => {
-
-  const navigate = useNavigate();  // Initialize navigate function
-
-    const handleRegister = () => {
-      navigate(`/event/${id}`);      // Navigate with event ID
-    };
-
+  console.log("isRegistered:", isRegistered); // Debugging
 
   return (
     <div
@@ -25,7 +19,7 @@ const EventOverlay = ({ title, isHost, onRegister, onViewDetails , id }) => {
         {title}
       </h3>
 
-      {isHost ? (
+      {isHost || isRegistered ? ( // If host or registered, show "View Details"
         <button
           onClick={onViewDetails}
           className="mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 
@@ -37,7 +31,6 @@ const EventOverlay = ({ title, isHost, onRegister, onViewDetails , id }) => {
         </button>
       ) : (
         <button
-        
           onClick={onRegister}
           className="mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 
                    font-semibold py-2 px-6 text-lg rounded-lg shadow-md 

@@ -25,14 +25,16 @@ import EventRegistration from './components/EventRegistration/EventRegistration.
 import MyCreatedEvents from "./components/Host-landing/MyCreatedEvents.jsx";
 import Dashboard from "./components/Host-landing/Dashboard.jsx";
 import EventCreation from "./components/Host-landing/EventCreation.jsx"
+import UserDashboard from "./components/User-landing/UserDashboard.jsx";
+import ExplorePastEvents from "./components/User-landing/ExplorePastEvents.jsx"
 
 
 function App() {
   return (    
     <EventProvider>
       <Router>
-        <Navbar />
         <AuthContextProvider>
+          <Navbar />
           <ToastContainer />
           <Routes>
 
@@ -54,6 +56,8 @@ function App() {
             <Route path="/host-dashboard" element={<Dashboard />} />
             <Route path="/my-created-events" element={<MyCreatedEvents />} />
             <Route path="/create-events" element={<EventCreation />} />
+            <Route path="/user-dashboard" element={<UserDashboard />} />
+            <Route path="/explore-all-events" element={<ExplorePastEvents />} />
 
 
             {/* Protected Routes */}

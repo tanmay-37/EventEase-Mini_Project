@@ -48,7 +48,7 @@ const UserSignUp = () => {
         draggable: true,
         progress: undefined
       });
-      navigate("/account");
+      navigate("/user-dashboard");
     } catch (err) {
       setError(err.message);
       console.log(err.message);

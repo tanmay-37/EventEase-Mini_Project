@@ -44,7 +44,7 @@ const UserLogin = () => {
       }
 
       toast.success("Login successful!", { position: "top-center", autoClose: 2000 });
-      navigate("/discover");
+      navigate("/user-dashboard");
     } catch (err) {
       setError(err.message);
       toast.error(err.message, { position: "bottom-center", autoClose: 2000 });

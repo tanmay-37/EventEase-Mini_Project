@@ -6,7 +6,7 @@ const Layout = () => {
   return (
     <div>
       <Outlet />           {/* Renders the child route component */}
-      <EventsHeader />     {/* This will always be displayed below Outlet */}
+      {/* <EventsHeader />     This will always be displayed below Outlet */}
     </div>
   );
 };

@@ -1,10 +1,11 @@
 import React from "react";
-import EventDetails from "../EventDetails/EventDetails";
+import EventDetails from "./EventDetails/EventDetails";
 import { useNavigate } from "react-router-dom";
 
-const EventOverlay = ({ title, onRegister , id }) => {
-    
-    const navigate = useNavigate();  // Initialize navigate function
+
+const EventOverlay = ({ title, isHost, onRegister, onViewDetails , id }) => {
+
+  const navigate = useNavigate();  // Initialize navigate function
 
     const handleRegister = () => {
       navigate(`/event/${id}`);      // Navigate with event ID
@@ -20,21 +21,32 @@ const EventOverlay = ({ title, onRegister , id }) => {
                  group-hover:bottom-[-40px] scale-95 group-hover:scale-100 
                  transition-all duration-300 -translate-x-1/2 z-[50] p-4 overflow-hidden"
     >
-      {/* Event Title */}
       <h3 className="text-lg font-bold px-2 max-w-full truncate text-[#4A3F74]">
         {title}
       </h3>
 
-      {/* Register Button */}
-      <button
-        onClick={handleRegister}
-        className="mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 
+      {isHost ? (
+        <button
+          onClick={onViewDetails}
+          className="mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 
                    font-semibold py-2 px-6 text-lg rounded-lg shadow-md 
                    hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] 
                    transition-all duration-300"
-      >
-        Register
-      </button>
+        >
+          View Details
+        </button>
+      ) : (
+        <button
+        
+          onClick={onRegister}
+          className="mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 
+                   font-semibold py-2 px-6 text-lg rounded-lg shadow-md 
+                   hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] 
+                   transition-all duration-300"
+        >
+          Register
+        </button>
+      )}
     </div>
   );
 };

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase";
 import { getAuth } from "firebase/auth";
-import { useNavigate, useParams } from "react-router-dom";  // ✅ Import useParams
+import { useNavigate, useParams } from "react-router-dom";
 
 const EventRegistration = () => {
   const navigate = useNavigate();
-  const { id: eventId } = useParams();  // ✅ Extract eventId from route params
+  const { id: eventId } = useParams(); // Extract eventId from route params
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -16,20 +16,21 @@ const EventRegistration = () => {
     linkedin: "",
     nationality: "",
     college: "",
-    paymentScreenshot: ""
+    paymentScreenshot: "",
   });
 
   const [loading, setLoading] = useState(false);
 
-  // ✅ Handle form input changes
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
+  // Handle file upload for payment screenshot
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -37,16 +38,17 @@ const EventRegistration = () => {
       reader.onload = () => {
         setFormData((prev) => ({
           ...prev,
-          paymentScreenshot: reader.result
+          paymentScreenshot: reader.result,
         }));
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -66,7 +68,7 @@ const EventRegistration = () => {
 
       const registrationData = {
         ...formData,
-        eventId,  // ✅ Add eventId dynamically from route
+        eventId, // Add eventId dynamically from route
         userId: user.uid,
         createdAt: serverTimestamp(),
       };
@@ -74,7 +76,6 @@ const EventRegistration = () => {
       await addDoc(collection(db, "registrations"), registrationData);
       alert("Registered successfully!");
       navigate(`/event/${eventId}`);
-
     } catch (error) {
       console.error("Error registering:", error);
       alert("Failed to register. Please try again.");
@@ -84,103 +85,74 @@ const EventRegistration = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto mt-10">
-      <h2 className="text-2xl font-bold mb-6">Event Registration</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div
+      className="min-h-screen bg-purple-100 flex items-center justify-center"
+      style={{
+        backgroundImage: "url('/images/doodad.png')",
+        backgroundSize: "500px",
+        backgroundPosition: "left",
+      }}
+    >
+      <div className="bg-white shadow-2xl rounded-lg p-8 max-w-lg w-full">
+        <h2 className="text-3xl font-bold mb-6">Event Registration</h2>
 
-        <input
-          type="text"
-          name="fullName"
-          placeholder="Full Name"
-          value={formData.fullName}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded"
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Reusable Input Field Component */}
+          {[
+            { label: "Full Name", name: "fullName", type: "text", placeholder: "Enter your full name", required: true },
+            { label: "Email", name: "email", type: "email", placeholder: "Enter your email", required: true },
+            { label: "WhatsApp Number", name: "whatsapp", type: "tel", placeholder: "Enter WhatsApp number", required: true },
+            { label: "GitHub Profile", name: "github", type: "url", placeholder: "Enter GitHub profile URL" },
+            { label: "LinkedIn Profile", name: "linkedin", type: "url", placeholder: "Enter LinkedIn profile URL" },
+            { label: "Nationality", name: "nationality", type: "text", placeholder: "Enter your nationality" },
+            { label: "College/University", name: "college", type: "text", placeholder: "Enter college/university name" },
+          ].map(({ label, name, type, placeholder, required }) => (
+            <div key={name}>
+              <label className="block text-sm font-medium text-gray-700">{label}</label>
+              <input
+                type={type}
+                name={name}
+                value={formData[name]}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all"
+                placeholder={placeholder}
+                required={required}
+              />
+            </div>
+          ))}
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded"
-        />
+          {formData.paymentScreenshot && (
+            <img
+              src={formData.paymentScreenshot}
+              alt="Payment Screenshot"
+              className="w-full h-48 object-cover rounded-md mt-2"
+            />
+          )}
 
-        <input
-          type="text"
-          name="whatsapp"
-          placeholder="WhatsApp No"
-          value={formData.whatsapp}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded"
-        />
+          {/* Upload Screenshot */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Upload Payment Screenshot</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all"
+              required
+            />
+            {loading && <p className="text-blue-500">Uploading...</p>}
+          </div>
 
-        <input
-          type="text"
-          name="github"
-          placeholder="GitHub Profile"
-          value={formData.github}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-
-        <input
-          type="text"
-          name="linkedin"
-          placeholder="LinkedIn Profile"
-          value={formData.linkedin}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-
-        <input
-          type="text"
-          name="nationality"
-          placeholder="Nationality"
-          value={formData.nationality}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded"
-        />
-
-        <input
-          type="text"
-          name="college"
-          placeholder="College/University"
-          value={formData.college}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded"
-        />
-
-        <label className="block text-sm font-medium text-gray-700">Upload Payment Screenshot</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileUpload}
-          required
-          className="w-full p-2 border rounded"
-        />
-
-        {formData.paymentScreenshot && (
-          <img
-            src={formData.paymentScreenshot}
-            alt="Payment Screenshot"
-            className="w-full h-48 object-cover rounded-md mt-2"
-          />
-        )}
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition"
-          disabled={loading}
-        >
-          {loading ? "Registering..." : "Register"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            className={`mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white font-semibold py-2 px-6 text-lg rounded-lg shadow-md hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] transition-all duration-300 w-full ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
+            disabled={loading}
+          >
+            {loading ? "Submitting..." : "Register"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

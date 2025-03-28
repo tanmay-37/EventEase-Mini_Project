@@ -6,13 +6,9 @@ import imageCompression from "browser-image-compression";
 import { useNavigate } from "react-router-dom";  // Import for navigation
 
 
-
-
-
 const EventsHeader = () => {
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
-  
   const [eventData, setEventData] = useState({
     image: "",
     title: "",

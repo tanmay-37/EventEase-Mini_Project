@@ -19,10 +19,12 @@ import Layout from './components/Layout/Layout.jsx';
 
 import ForgotPassword from './components/registration/ForgotPassword'
 import Discover from './components/User-landing/Discover'
-import EventCreation from './components/Host-landing/EventCreation.jsx';
-import Dashboard from './components/Host-landing/Dashboard.jsx'
 import EventDetails from './components/EventDetails/EventDetails.jsx';
 import EventRegistration from './components/EventRegistration/EventRegistration.jsx';
+
+import MyCreatedEvents from "./components/Host-landing/MyCreatedEvents.jsx";
+import Dashboard from "./components/Host-landing/Dashboard.jsx";
+import EventCreation from "./components/Host-landing/EventCreation.jsx"
 
 
 function App() {
@@ -46,10 +48,13 @@ function App() {
             <Route path="/login" element={<UserLogin />} />
             <Route path="/host-signup" element={<HostSignUp />} />
             <Route path="/host-login" element={<HostLogin />} />
-            <Route path="/event/:id" element={<EventDetails />} />
+            <Route path="/event-details/:id" element={<EventDetails />} />
             <Route path="/event/:id/register" element={<EventRegistration />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/host-dashboard" element={<Dashboard />} />
+            <Route path="/my-created-events" element={<MyCreatedEvents />} />
+            <Route path="/create-events" element={<EventCreation />} />
+
 
             {/* Protected Routes */}
 
@@ -71,14 +76,14 @@ function App() {
               } 
             />
             <Route 
-              path="/event-creation" 
+              path="/host-dashboard" 
               element={
                 <ProtectedRoute>
-                  <EventCreation />
+                  <Dashboard />
                 </ProtectedRoute>
               } 
             />
-            <Route path="/developed-by-team" element={<DevelopedByTeam />} />  {/* New route for team page */}
+            <Route path="/developed-by-team" element={<DevelopedByTeam />} />  {/*New route for team page */}
           </Routes>
         </AuthContextProvider>
         <Footer />
@@ -87,4 +92,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

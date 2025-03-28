@@ -4,6 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 
 
+
 // function to fetch event details from firestore.
 const EventDetails = () => {
   const { id } = useParams();
@@ -17,7 +18,9 @@ const EventDetails = () => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setEvent(docSnap.data());
+           // Include the ID in the event object
+          setEvent({ id: docSnap.id, ...docSnap.data() });
+          // setEvent(docSnap.data());
         } else {
           console.log("No such event!");
         }
@@ -54,7 +57,8 @@ const EventDetails = () => {
         <div className="flex justify-between mt-6">
           <button
             className="bg-purple-600 text-white hover:bg-purple-800 px-4 py-2 rounded hover:cursor-pointer"
-            onClick={() => navigate(`/event/${id}/register`)} 
+            eventId = {event.id}
+            onClick={() => navigate(`/event/${id}/register`, { state: { eventId: id } })}
           >
             Register
           </button>

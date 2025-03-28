@@ -6,7 +6,8 @@ import { UserAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const EventForm = ({ onClose }) => {
-  const { userId } = UserAuth(); 
+  const { user } = UserAuth(); 
+  const userId = user?.uid;  
   const navigate = useNavigate();
   const [eventData, setEventData] = useState({
     image: "",
@@ -54,13 +55,36 @@ const EventForm = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!userId) {
+      alert("User not authenticated. Please log in.");
+      return;
+    }
+  
     if (loading) return alert("Image is still processing. Please wait...");
-    if (!eventData.image || !userId) return alert("Please complete all fields.");
+    if (!eventData.image) return alert("Please complete all fields.");
+  
     try {
-      await addDoc(collection(db, "events"), { ...eventData, userId, createdAt: serverTimestamp() });
+      await addDoc(collection(db, "events"), {
+        ...eventData,
+        userId,  // Ensure valid userId is passed
+        createdAt: serverTimestamp()
+      });
       alert("Event added successfully!");
-      setEventData({ image: "", title: "", description: "", startDate: "", endDate: "", startTime: "", endTime: "", venue: "", registrationLink: "" });
-    } catch {
+      setEventData({
+        image: "",
+        title: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        startTime: "",
+        endTime: "",
+        venue: "",
+        registrationLink: ""
+      });
+      navigate("/dashboard");  // Navigate to dashboard after event creation
+    } catch (error) {
+      console.error("Failed to add event:", error);
       alert("Failed to add event!");
     }
   };
@@ -68,6 +92,7 @@ const EventForm = ({ onClose }) => {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl max-w-lg mx-auto mt-10 border border-gray-200">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800 text-center">Create New Event</h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block text-sm font-medium text-gray-700">Upload Event Image</label>
         <input type="file" accept="image/*" name="image" onChange={handleImageUpload} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all" required />
@@ -102,7 +127,13 @@ const EventForm = ({ onClose }) => {
 
         <input type="text" name="venue" value={eventData.venue} onChange={handleChange} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 focus:outline-none" placeholder="Venue" required />
 
-        <button type="submit" className={`mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white font-semibold py-2 px-6 text-lg rounded-lg shadow-md hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] transition-all duration-300 w-full ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`} disabled={loading}>{loading ? "Uploading..." : "Create Event"}</button>
+        <button
+         type="submit" 
+         className={`mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white font-semibold py-2 px-6 text-lg rounded-lg shadow-md hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] transition-all duration-300 w-full
+           ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`} 
+         disabled={loading}>{loading ? "Uploading..." : "Create Event"}
+
+        </button>
       </form>
 
       <div className="flex justify-between items-center mt-4">

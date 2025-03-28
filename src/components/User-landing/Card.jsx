@@ -14,7 +14,7 @@ const formatTimeTo12Hour = (time) => {
 const EventCard = ({ event }) => {
   return (
     <div
-      className="relative w-[350px] bg-white shadow-lg rounded-lg 
+      className="relative w-full max-w-[350px] bg-white shadow-lg rounded-lg 
                  transition-all duration-500 ease-in-out transform group 
                  hover:scale-105 hover:shadow-2xl p-4 mx-2 mb-6"
     >
@@ -27,7 +27,7 @@ const EventCard = ({ event }) => {
       )}
 
       <div className="p-4 flex flex-col h-full">
-        {/* Event Title (Fades in on Hover) */}
+        {/* Event Title (Fades in on Hover for Desktop) */}
         <h3
           className="text-lg font-bold text-gray-800 mb-2 h-[50px] overflow-hidden 
                      opacity-50 group-hover:opacity-100 transition-opacity duration-300"
@@ -54,11 +54,27 @@ const EventCard = ({ event }) => {
             <FiMapPin className="text-red-500" />
             <p className="text-sm">{event.venue}</p>
           </div>
+        {/* Register Button (Visible on Mobile) */}
+        <button
+          className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg 
+                     text-center text-sm font-semibold md:hidden"
+          onClick={() => alert("Register functionality to be implemented!")}
+        >
+          Register Now
+        </button>
         </div>
+
       </div>
 
+      {/* Event Overlay (Visible on Hover for Desktop) */}
+      <div className="hidden md:block">
+        <EventOverlay
+          title={event.title}
+          id={event.id}
+          onRegister={() => alert("Register functionality to be implemented!")}
+        />
+      </div>
 
-    <EventOverlay title={event.title} id={event.id} onRegister={() => alert("Register functionality to be implemented!")} />
     </div>
   );
 };

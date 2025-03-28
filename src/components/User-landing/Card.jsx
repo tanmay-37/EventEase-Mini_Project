@@ -22,7 +22,7 @@ const EventCard = ({ event }) => {
         <img
           src={event.image}
           alt="Event"
-          className="w-full h-[200px] object-cover rounded-t-lg"
+          className="w-full h-[200px] object-fill rounded-t-lg"
         />
       )}
 
@@ -70,9 +70,11 @@ const EventCard = ({ event }) => {
       <div className="hidden md:block">
         <EventOverlay
           title={event.title}
+          id={event.id}
           onRegister={() => alert("Register functionality to be implemented!")}
         />
       </div>
+
     </div>
   );
 };

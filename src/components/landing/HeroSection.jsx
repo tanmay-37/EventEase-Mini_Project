@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
   const [showDetails, setShowDetails] = useState(false);
@@ -42,7 +43,7 @@ const HeroSection = () => {
             Your all-in-one platform for discovering, scheduling, and managing college events effortlessly. Stay updated with the latest happenings, connect with like-minded students, and make your campus life more vibrant and exciting!
           </p>
           <a
-            href="#services"
+            onClick={() => navigate('/login')}
             className="w-32 bg-purple-600 hover:bg-purple-500 text-white font-extrabold py-3 px-6 rounded-lg"
           >
             Get Started

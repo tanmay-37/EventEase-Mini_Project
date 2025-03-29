@@ -52,7 +52,7 @@ const MyRegisteredEvents = () => {
           if (eventDoc.exists()) {
             validEvents.push({
               ...reg,
-              eventData: eventDoc.data(), // Fetch actual event details
+              eventData: eventDoc.data(),
             });
           }
         }
@@ -83,13 +83,13 @@ const MyRegisteredEvents = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {registeredEvents.slice(0, showAll ? registeredEvents.length : 2).map((event) => (
-            <EventCard key={event.id} event={event.eventData} />
+            <EventCard key={event.id} event={{ id: event.eventId, ...event.eventData }} />
           ))}
 
           {registeredEvents.length > 2 && !showAll && (
             <button
               onClick={() => navigate("/explore-all-events")}
-              className="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="mt-3 px-4 py-2 bg-[#A084E8] text-white rounded-md hover:bg-[#8C72D4"
             >
               Explore All Your Past Events
             </button>

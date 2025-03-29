@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const HeroSection = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [headingLoaded, setHeadingLoaded] = useState(false);
+  const navigate = useNavigate();
 
   const handleScroll = () => {
     if (window.scrollY > 50) {

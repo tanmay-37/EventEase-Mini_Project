@@ -99,13 +99,23 @@ const Navbar = () => {
           >
             Home
           </Link>
-          <Link
-            to="/discover"
-            className="text-gray-700 text-lg hover:text-purple-600"
-            onClick={() => setIsMenuOpen(false)}
-          >
+          {isHost ? null : 
+          <Link to="/discover" className="text-gray-700 transition duration-300 ease-in-out hover:text-purple-600">
             View Events
-          </Link>
+          </Link>}
+          {!isHost ? 
+          <Link
+            to="/user-dashboard"
+            className="text-gray-700 border border-gray-400 rounded px-4 py-2 transition duration-300 ease-in-out hover:text-white hover:bg-gradient-to-r from-purple-500 to-purple-700"
+          >
+            Dashboard
+          </Link> : 
+          <Link
+            to="/host-dashboard"
+            className="text-gray-700 border border-gray-400 rounded px-4 py-2 transition duration-300 ease-in-out hover:text-white hover:bg-gradient-to-r from-purple-500 to-purple-700"
+          >
+            Dashboard
+          </Link>}
           {user ? <Logout /> : 
           <Link
             to="/login"

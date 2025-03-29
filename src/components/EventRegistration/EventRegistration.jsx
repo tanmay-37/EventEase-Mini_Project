@@ -151,7 +151,7 @@ const EventRegistration = () => {
           <button
             type="button"
             onClick={() => setShowPaymentQR(!showPaymentQR)}
-            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 w-full"
+            className="bg-[#A084E8] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-[#8C72D4] transition-all duration-300 w-full"
           >
             {showPaymentQR ? "Hide Payment QR" : "View Payment QR"}
           </button>

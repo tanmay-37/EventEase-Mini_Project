@@ -9,7 +9,8 @@ import Logout from "../Logout"
 const Navbar = () => {
   // Get the EventContext value
   const eventContext = useContext(EventContext);
-  const {user} = UserAuth();
+  const {user, userType} = UserAuth();
+  const isHost = userType === "host";
 
   if (!eventContext) {
     console.error("Navbar must be used within an EventProvider");
@@ -32,9 +33,23 @@ const Navbar = () => {
           <Link to="/" className="text-gray-700 transition duration-300 ease-in-out hover:text-purple-600">
             Home
           </Link>
+          {isHost ? null : 
           <Link to="/discover" className="text-gray-700 transition duration-300 ease-in-out hover:text-purple-600">
             View Events
-          </Link>
+          </Link>}
+          {!isHost ? 
+          <Link
+            to="/user-dashboard"
+            className="text-gray-700 border border-gray-400 rounded px-4 py-2 transition duration-300 ease-in-out hover:text-white hover:bg-gradient-to-r from-purple-500 to-purple-700"
+          >
+            Dashboard
+          </Link> : 
+          <Link
+            to="/host-dashboard"
+            className="text-gray-700 border border-gray-400 rounded px-4 py-2 transition duration-300 ease-in-out hover:text-white hover:bg-gradient-to-r from-purple-500 to-purple-700"
+          >
+            Dashboard
+          </Link>}
           {user ? <Logout /> : 
           <Link
             to="/login"

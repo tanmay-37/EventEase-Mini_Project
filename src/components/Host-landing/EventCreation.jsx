@@ -82,7 +82,7 @@ const EventForm = ({ onClose }) => {
         venue: "",
         registrationLink: ""
       });
-      navigate("/dashboard");  // Navigate to dashboard after event creation
+      navigate("/host-dashboard"); 
     } catch (error) {
       console.error("Failed to add event:", error);
       alert("Failed to add event!");

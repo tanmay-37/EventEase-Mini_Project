@@ -1,37 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { UserAuth } from '../../context/AuthContext'; // Ensure this is the correct import for AuthContext
 
 const HeroSection = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [headingLoaded, setHeadingLoaded] = useState(false);
   const navigate = useNavigate();
+  const { user, userType } = UserAuth(); // Extract user and userType from AuthContext
 
-  const handleScroll = () => {
-    if (window.scrollY > 50) {
-      setShowDetails(true);
+  useEffect(() => {
+    window.addEventListener('scroll', () => {
+      setShowDetails(window.scrollY > 50);
+    });
+
+    setHeadingLoaded(true);
+    
+    return () => window.removeEventListener('scroll', () => {
+      setShowDetails(window.scrollY > 50);
+    });
+  }, []);
+
+  // Handle navigation when clicking "Get Started"
+  const handleGetStarted = () => {
+    if (user) {
+      if (userType === 'host') {
+        navigate('/host-dashboard');
+      } else {
+        navigate('/user-dashboard'); 
+      }
     } else {
-      setShowDetails(false);
+      navigate('/login');
     }
   };
 
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    setHeadingLoaded(true);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <section 
-    style={{
+      style={{
         backgroundImage: "url('/images/doodad.png')",
         backgroundSize: "500px",
         backgroundPosition: "left",
         height: "100%",
         width: "100%",
       }}
-    className="h-screen flex flex-col justify-center items-center text-white pb-10">
+      className="h-screen flex flex-col justify-center items-center text-white pb-10"
+    >
       {/* Main Branding */}
-      <h1 className="text-[20vw] text-center mt-10 md:mt-18  w-full from-purple-600 via-purple-700 to-purple-800 bg-gradient-to-r bg-clip-text  text-transparent font-extrabold transition duration-[4000ms] md:-translate-y-2 translate-y-5">
+      <h1 className="text-[20vw] text-center mt-10 md:mt-18 w-full from-purple-600 via-purple-700 to-purple-800 bg-gradient-to-r bg-clip-text text-transparent font-extrabold transition duration-[4000ms] md:-translate-y-2 translate-y-5">
         EventEase
       </h1>      
 
@@ -43,12 +57,12 @@ const HeroSection = () => {
           <p className="text-xl text-black font-semibold mb-6">
             Your all-in-one platform for discovering, scheduling, and managing college events effortlessly. Stay updated with the latest happenings, connect with like-minded students, and make your campus life more vibrant and exciting!
           </p>
-          <a
-            onClick={() => navigate('/login')}
+          <button
+            onClick={handleGetStarted}
             className="w-32 bg-purple-600 hover:bg-purple-500 text-white font-extrabold py-3 px-6 rounded-lg"
           >
             Get Started
-          </a>
+          </button>
         </div>
 
         {/* Right Column: Image */}
@@ -65,19 +79,3 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
-
-
-
-
-
-// import React from 'react'
-
-// const HeroSection = () => {
-//   return (
-//     <div className=''>
-        
-//     </div>
-//   )
-// }
-
-// export default HeroSection

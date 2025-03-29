@@ -56,26 +56,15 @@ function App() {
             <Route path="/host-dashboard" element={<Dashboard />} />
             <Route path="/my-created-events" element={<MyCreatedEvents />} />
             <Route path="/create-events" element={<EventCreation />} />
-            <Route path="/user-dashboard" element={<UserDashboard />} />
+            <Route path="/discover" element={<Discover />} />
             <Route path="/explore-all-events" element={<ExplorePastEvents />} />
 
 
-            {/* Protected Routes */}
-
             <Route 
-              path="/account" 
+              path="/user-dashboard" 
               element={
                 <ProtectedRoute>
-                  <Account />
-                </ProtectedRoute>
-              } 
-            />
-
-            <Route 
-              path="/discover" 
-              element={
-                <ProtectedRoute>
-                  <Discover />
+                  <UserDashboard />
                 </ProtectedRoute>
               } 
             />

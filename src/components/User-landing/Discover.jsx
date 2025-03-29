@@ -191,8 +191,6 @@ const Discover = () => {
               </div>
             )}
           </section>
-
-          <Logout />
         </section>
       </div>
     </>

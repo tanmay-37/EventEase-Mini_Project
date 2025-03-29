@@ -20,6 +20,7 @@ const EventRegistration = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [showPaymentQR, setShowPaymentQR] = useState(false); // Toggle payment QR visibility
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -46,62 +47,60 @@ const EventRegistration = () => {
   };
 
   // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    const auth = getAuth();
+    const user = auth.currentUser;
 
-  const auth = getAuth();
-  const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to register for this event.");
+      return;
+    }
 
-  if (!user) {
-    alert("You must be logged in to register for this event.");
-    return;
-  }
+    if (!eventId) {
+      console.error("Invalid eventId:", eventId);
+      alert("Invalid Event ID. Please try again.");
+      return;
+    }
 
-  if (!eventId) {
-    console.error("Invalid eventId:", eventId);
-    alert("Invalid Event ID. Please try again.");
-    return;
-  }
+    try {
+      setLoading(true);
 
-  try {
-    setLoading(true);
+      // Firestore document references
+      const eventRef = doc(db, "events", eventId);
+      const registrationsRef = collection(db, "registrations");
 
-    // Firestore document references
-    const eventRef = doc(db, "events", eventId);
-    const registrationsRef = collection(db, "registrations");
+      // Firestore transaction for atomic updates
+      await runTransaction(db, async (transaction) => {
+        // Get event document
+        const eventDoc = await transaction.get(eventRef);
 
-    // Firestore transaction for atomic updates
-    await runTransaction(db, async (transaction) => {
-      // Get event document
-      const eventDoc = await transaction.get(eventRef);
+        if (!eventDoc.exists()) {
+          throw new Error("Event does not exist.");
+        }
 
-      if (!eventDoc.exists()) {
-        throw new Error("Event does not exist.");
-      }
+        // Add registration entry
+        await addDoc(registrationsRef, {
+          ...formData,
+          eventId,
+          userId: user.uid,
+          createdAt: serverTimestamp(),
+        });
 
-      // Add registration entry
-      await addDoc(registrationsRef, {
-        ...formData,
-        eventId,
-        userId: user.uid,
-        createdAt: serverTimestamp(),
+        // Increment registration count in event document
+        transaction.update(eventRef, { registrationCount: increment(1) });
       });
 
-      // Increment registration count in event document
-      transaction.update(eventRef, { registrationCount: increment(1) });
-    });
-
-    alert("Registered successfully!");
-    navigate(`/event-details/${eventId}`)
-  } catch (error) {
-    console.error("Error registering:", error);
-    alert("Failed to register. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      alert("Registered successfully!");
+      navigate(`/event-details/${eventId}`);
+    } catch (error) {
+      console.error("Error registering:", error);
+      alert("Failed to register. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -116,7 +115,7 @@ const handleSubmit = async (e) => {
         <h2 className="text-3xl font-bold mb-6">Event Registration</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Reusable Input Field Component */}
+          {/* Form Fields */}
           {[
             { label: "Full Name", name: "fullName", type: "text", placeholder: "Enter your full name", required: true },
             { label: "Email", name: "email", type: "email", placeholder: "Enter your email", required: true },
@@ -146,6 +145,27 @@ const handleSubmit = async (e) => {
               alt="Payment Screenshot"
               className="w-full h-48 object-cover rounded-md mt-2"
             />
+          )}
+
+          {/* View Payment QR Button */}
+          <button
+            type="button"
+            onClick={() => setShowPaymentQR(!showPaymentQR)}
+            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 w-full"
+          >
+            {showPaymentQR ? "Hide Payment QR" : "View Payment QR"}
+          </button>
+
+          {/* Display QR Code if button is clicked */}
+          {showPaymentQR && (
+            <div className="mt-4 flex flex-col items-center">
+              <h3 className="text-lg font-bold">Scan to Pay</h3>
+              <img
+                src="/QRCODE.jpeg" // Replace with actual QR image path
+                alt="Payment QR Code"
+                className="w-40 h-40 object-cover rounded-md shadow-lg"
+              />
+            </div>
           )}
 
           {/* Upload Screenshot */}

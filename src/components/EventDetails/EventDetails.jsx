@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { UserAuth } from "../../context/AuthContext";
 import { FiUsers } from "react-icons/fi";
 import Spinner from "../Spinner";
 
 const EventDetails = () => {
-  const { id } = useParams(); // Extract event ID from route params
-  const [event, setEvent] = useState(null); // State to store event details
-  const [loading, setLoading] = useState(true); // State to track loading
+  const { id } = useParams();
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isRegistered, setIsRegistered] = useState(false);
   const navigate = useNavigate();
-  const { userType } = UserAuth(); // Get user type from context
-  const isHost = userType === "host"; // Determine if the user is a host
+  const { user, userType } = UserAuth();
+  const isHost = userType === "host";
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -21,7 +22,6 @@ const EventDetails = () => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          // Include the ID in the event object
           setEvent({ id: docSnap.id, ...docSnap.data() });
         } else {
           console.error("No such event!");
@@ -29,12 +29,32 @@ const EventDetails = () => {
       } catch (error) {
         console.error("Error fetching event:", error);
       } finally {
-        setLoading(false); // Stop loading after fetching data
+        setLoading(false);
+      }
+    };
+
+    const checkRegistration = async () => {
+      if (!user) return;
+
+      try {
+        const q = query(
+          collection(db, "registrations"),
+          where("eventId", "==", id),
+          where("userId", "==", user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          setIsRegistered(true);
+        }
+      } catch (error) {
+        console.error("Error checking registration:", error);
       }
     };
 
     fetchEvent();
-  }, [id]);
+    checkRegistration();
+  }, [id, user]);
 
   if (loading) {
     return (
@@ -62,28 +82,19 @@ const EventDetails = () => {
       }}
     >
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
-        {/* Event Image */}
         <div className="w-full max-h-96 flex justify-center items-center overflow-hidden rounded-xl">
-          <img
-            src={event.image}
-            alt="Event"
-            className="w-auto h-auto max-w-full max-h-96 object-contain"
-          />
+          <img src={event.image} alt="Event" className="w-auto h-auto max-w-full max-h-96 object-contain" />
         </div>
 
-        {/* Event Title */}
         <h2 className="text-4xl font-extrabold mt-6 text-gray-800">{event.title}</h2>
 
-        {/* Event Description */}
         <p className="text-gray-700 mt-4 leading-relaxed whitespace-pre-line">{event.description}</p>
 
-        {/* Event Date & Venue */}
         <div className="mt-4 text-gray-600 text-lg font-semibold space-y-2">
           <p>📅 {event.endDate ? `${event.startDate} - ${event.endDate}` : event.startDate}</p>
           <p>📍 {event.venue}</p>
         </div>
 
-        {/* Show Host Details for Users Only */}
         {!isHost && event.host && (
           <div className="mt-6 p-4 bg-gray-100 rounded-lg">
             <h3 className="text-lg font-semibold text-gray-800">Host Details</h3>
@@ -92,7 +103,6 @@ const EventDetails = () => {
           </div>
         )}
 
-        {/* Host View: Show No. of Registrations */}
         {isHost && (
           <div className="flex items-center gap-2 text-gray-700 mt-6">
             <FiUsers className="text-purple-500 text-xl" />
@@ -102,15 +112,20 @@ const EventDetails = () => {
           </div>
         )}
 
-        {/* Buttons */}
         <div className="mt-8 flex justify-between">
           {!isHost && (
-            <button
-              className="bg-purple-600 text-white hover:bg-purple-800 px-5 py-2 rounded-lg shadow-md transition"
-              onClick={() => navigate(`/event/${id}/register`, { state: { eventId: id } })}
-            >
-              Register
-            </button>
+            isRegistered ? (
+              <button className="bg-gray-400 text-white px-5 py-2 rounded-lg shadow-md transition cursor-not-allowed">
+                Already Registered
+              </button>
+            ) : (
+              <button
+                className="bg-purple-600 text-white hover:bg-purple-800 px-5 py-2 rounded-lg shadow-md transition"
+                onClick={() => navigate(`/event/${id}/register`, { state: { eventId: id } })}
+              >
+                Register
+              </button>
+            )
           )}
 
           <button

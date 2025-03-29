@@ -3,10 +3,13 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react"; // Icons for the hamburger menu
 import logo from "../../assets/logo.png";
 import { EventContext } from "../../context/EventContext";
+import {UserAuth} from "../../context/AuthContext"
+import Logout from "../Logout"
 
 const Navbar = () => {
   // Get the EventContext value
   const eventContext = useContext(EventContext);
+  const {user} = UserAuth();
 
   if (!eventContext) {
     console.error("Navbar must be used within an EventProvider");
@@ -29,15 +32,16 @@ const Navbar = () => {
           <Link to="/" className="text-gray-700 transition duration-300 ease-in-out hover:text-purple-600">
             Home
           </Link>
-          <Link to="/events" className="text-gray-700 transition duration-300 ease-in-out hover:text-purple-600">
+          <Link to="/discover" className="text-gray-700 transition duration-300 ease-in-out hover:text-purple-600">
             View Events
           </Link>
+          {user ? <Logout /> : 
           <Link
             to="/login"
             className="text-gray-700 border border-gray-400 rounded px-4 py-2 transition duration-300 ease-in-out hover:text-white hover:bg-gradient-to-r from-purple-500 to-purple-700"
           >
             Login/SignUp
-          </Link>
+          </Link>}
         </div>
 
         {/* Hamburger Menu Button (Visible on small screens) */}
@@ -81,19 +85,19 @@ const Navbar = () => {
             Home
           </Link>
           <Link
-            to="/events"
+            to="/discover"
             className="text-gray-700 text-lg hover:text-purple-600"
             onClick={() => setIsMenuOpen(false)}
           >
             View Events
           </Link>
+          {user ? <Logout /> : 
           <Link
             to="/login"
             className="text-gray-700 border border-gray-400 rounded px-4 py-2 transition duration-300 ease-in-out hover:text-white hover:bg-gradient-to-r from-purple-500 to-purple-700"
-            onClick={() => setIsMenuOpen(false)}
           >
             Login/SignUp
-          </Link>
+          </Link>}
           
         </div>
       </div>

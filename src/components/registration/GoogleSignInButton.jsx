@@ -13,7 +13,7 @@ const GoogleSignInButton = () => {
       const user = await googleSignIn();
       toast.success("Google Login Successful!", { position: "top-center", autoClose: 2000 });
       console.log("Logged in User:", user);
-      navigate("/discover");
+      navigate("/user-dashboard");
     } catch (err) {
       toast.error("Google Login Failed. Try again.", { position: "bottom-center", autoClose: 2000 });
       console.error("Google Sign-In Error:", err);

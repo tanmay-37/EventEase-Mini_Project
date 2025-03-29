@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { collection, query, where, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import { UserAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom"; // Import navigation hook
+import { useNavigate } from "react-router-dom"; 
 
 const EventManagement = () => {
   const { user } = UserAuth();
-  const navigate = useNavigate(); // Initialize navigation
+  const navigate = useNavigate(); 
   const [events, setEvents] = useState([]);
   const [deletedEvent, setDeletedEvent] = useState(null);
   const [undoTimeout, setUndoTimeout] = useState(null);

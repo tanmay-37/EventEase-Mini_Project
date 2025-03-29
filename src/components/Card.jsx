@@ -88,13 +88,14 @@ const EventCard = ({ event }) => {
 
       {/* Event Overlay */}
       <div className="hidden md:block">
-        <EventOverlay
-          title={event.title}
-          id={event.id}
-          isHost={isHost}
-          onRegister={() => navigate(`/event-details/${event.id}`)}
-          onViewDetails={() => navigate(`/event-details/${event.id}`)}
-        />
+      <EventOverlay
+        title={event.title}
+        id={event.id}
+        isHost={isHost}
+        isRegistered={!!event.isRegistered}  // Ensure it's a boolean
+        onRegister={() => navigate(`/event-details/${event.id}`)}
+        onViewDetails={() => navigate(`/event-details/${event.id}`)}
+      />
       </div>
     </div>
   );

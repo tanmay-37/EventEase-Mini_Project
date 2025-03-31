@@ -16,10 +16,10 @@ const Footer = () => {
     };
 
     return (
-        <footer className="bg-gray-800 text-white py-6">
+        <footer className="bg-gray-800 text-white py-6 mt-auto">
             <div className="max-w-6xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row justify-between items-center md:items-start">
-
+                    
                     {/* Links Section */}
                     <div className="mb-4 md:mb-0 w-full md:w-1/3 text-center md:text-left">
                         <nav className="flex flex-col md:flex-row justify-center md:justify-start space-y-2 md:space-y-0 md:space-x-4">

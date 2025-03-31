@@ -35,13 +35,6 @@ const HeroSection = () => {
 
   return (
     <section 
-      style={{
-        backgroundImage: "url('/images/doodad.png')",
-        backgroundSize: "500px",
-        backgroundPosition: "left",
-        height: "100%",
-        width: "100%",
-      }}
       className="h-screen flex flex-col justify-center items-center text-white pb-10"
     >
       {/* Main Branding */}

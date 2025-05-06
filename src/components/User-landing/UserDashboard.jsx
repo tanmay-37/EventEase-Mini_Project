@@ -48,6 +48,14 @@ const UserDashboard = () => {
         backgroundSize: "500px",
         backgroundPosition: "left",
       }}>
+
+        // Add this in your navigation section
+<Link 
+  to="/user/recent-events"
+  className="text-[#4A3F74] hover:text-[#6a5ba7] transition-colors"
+>
+  Recent Events
+</Link>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
         <OverviewPanel />
         <MyRegisteredEvents />

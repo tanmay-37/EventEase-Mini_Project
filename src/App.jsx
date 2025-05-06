@@ -28,8 +28,15 @@ import EventCreation from "./components/Host-landing/EventCreation.jsx"
 import UserDashboard from "./components/User-landing/UserDashboard.jsx";
 import ExplorePastEvents from "./components/User-landing/ExplorePastEvents.jsx"
 import MyProfile from "./components/Profile/MyProfile.jsx" 
+import PastEvents from './components/PastEvents/PastEvents.jsx';
+import RecentEvents from './components/PastEvents/RecentEvents.jsx';
 
 function App() {
+  useEffect(() => {
+    cleanupExpiredEvents();
+    const interval = setInterval(cleanupExpiredEvents, 24 * 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <EventProvider>
       <Router basename="/">
@@ -66,6 +73,16 @@ function App() {
                   path="/host-dashboard" 
                   element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
                 />
+                <Route path="/host/past-events" element={
+                <ProtectedRoute>
+                  <PastEvents />
+                </ProtectedRoute>
+              } />
+              <Route path="/user/recent-events" element={
+                <ProtectedRoute>
+                  <RecentEvents />
+                </ProtectedRoute>
+              } />
               </Routes>
             </main>
             <Footer />

@@ -3,6 +3,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import EventCard from "../Card";
 import Logout from "../Logout";
+import { Link } from "react-router-dom";
 import { UserAuth } from "../../context/AuthContext";
 import OverviewPanel from "./OverviewPanel";
 import EventManagement from "./EventManagement";
@@ -44,6 +45,12 @@ const HostDashboard = () => {
         backgroundSize: "500px",
         backgroundPosition: "left",
       }}>
+        <Link 
+              to="/host/past-events" 
+              className="text-[#4A3F74] hover:text-[#6a5ba7] transition-colors font-medium"
+            >
+              Past Events
+            </Link>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
           <OverviewPanel />
           <EventManagement />

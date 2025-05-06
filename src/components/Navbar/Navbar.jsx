@@ -2,6 +2,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";  
 import logo from "../../assets/logo.png";
+import userLogo from "../../assets/Userlogo.webp";
 import { EventContext } from "../../context/EventContext";
 import { UserAuth } from "../../context/AuthContext";
 
@@ -67,7 +68,7 @@ const Navbar = () => {
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className="flex items-center space-x-2 focus:outline-none"
             >
-              <img src="src/assets/Userlogo.webp" alt="User Logo" className="w-12 h-12 rounded-full" />
+              <img src={userLogo} alt="User Logo" className="w-12 h-12 rounded-full" />
               <span className="text-gray-700 hidden md:inline">{user.displayName || "User"}</span>
             </button>
           ) : (

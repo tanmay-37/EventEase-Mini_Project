@@ -7,7 +7,8 @@ import Spinner from "../Spinner";
 import { useNavigate } from "react-router-dom";
 
 const ExploreAllEvents = () => {
-  const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [currentEvents, setCurrentEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { user } = UserAuth();
@@ -16,50 +17,55 @@ const ExploreAllEvents = () => {
   useEffect(() => {
     if (!user) return;
 
-    const fetchRegisteredEvents = async () => {
+    const fetchAllEvents = async () => {
       try {
         setLoading(true);
 
-        // Step 1: Get user's registrations
-        const q = query(collection(db, "registrations"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
+        // Fetch current registrations
+        const registrationsQuery = query(
+          collection(db, "registrations"), 
+          where("userId", "==", user.uid)
+        );
+        const registrationsSnap = await getDocs(registrationsQuery);
 
-        if (querySnapshot.empty) {
-          console.log("No registered events found.");
-          setRegisteredEvents([]);
-          setLoading(false);
-          return;
-        }
-
-        // Step 2: Extract event IDs and fetch event details
-        const eventDetails = [];
-        for (const regDoc of querySnapshot.docs) {
+        const currentEventsList = [];
+        for (const regDoc of registrationsSnap.docs) {
           const regData = regDoc.data();
-          if (!regData.eventId) continue; // Skip if eventId is missing
+          if (!regData.eventId) continue;
 
-          const eventRef = doc(db, "events", regData.eventId);
-          const eventDoc = await getDoc(eventRef);
-
+          const eventDoc = await getDoc(doc(db, "events", regData.eventId));
           if (eventDoc.exists()) {
-            eventDetails.push({
-              id: regDoc.id, // Keep registration ID
-              eventData: eventDoc.data(), // Fetch actual event details
-              ...regData, // Keep original registration details
+            currentEventsList.push({
+              id: regDoc.id,
+              eventData: { id: eventDoc.id, ...eventDoc.data() },
+              ...regData
             });
           }
         }
+        setCurrentEvents(currentEventsList);
 
-        console.log("Registered events with details:", eventDetails);
-        setRegisteredEvents(eventDetails);
+        // Fetch past events
+        const pastEventsQuery = query(
+          collection(db, "recentEvents"), 
+          where("userId", "==", user.uid)
+        );
+        const pastEventsSnap = await getDocs(pastEventsQuery);
+        const pastEventsList = pastEventsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          isRecent: true
+        }));
+        setPastEvents(pastEventsList);
+
       } catch (error) {
-        setErrorMessage("Failed to fetch registered events. Please try again.");
-        console.error("Error fetching registered events:", error);
+        setErrorMessage("Failed to fetch events. Please try again.");
+        console.error("Error fetching events:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRegisteredEvents();
+    fetchAllEvents();
   }, [user]);
 
   return (
@@ -71,27 +77,54 @@ const ExploreAllEvents = () => {
         backgroundPosition: "left",
       }}
     >
-      <div className="max-w-4xl mx-auto">
-        <button 
-          onClick={() => navigate(-1)}
-          className="mb-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800"
-        >
-          ⬅ Back to Dashboard
-        </button>
-
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">All Registered Events</h1>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <button 
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-[#A084E8] text-white rounded-lg hover:bg-[#8C72D4] transition-colors"
+          >
+            ⬅ Back to Dashboard
+          </button>
+        </div>
 
         {loading ? (
           <Spinner />
         ) : errorMessage ? (
           <p className="text-red-500">{errorMessage}</p>
-        ) : registeredEvents.length === 0 ? (
-          <p className="text-gray-600">You haven't registered for any events yet.</p>
+        ) : currentEvents.length === 0 && pastEvents.length === 0 ? (
+          <p className="text-gray-600 text-center">You haven't registered for any events yet.</p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {registeredEvents.map((event) => (
-              <EventCard key={event.id} event={event.eventData} />
-            ))}
+          <div className="space-y-8">
+            {/* Current Events Section */}
+            {currentEvents.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#4A3F74] mb-4">Current Events</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {currentEvents.map((event) => (
+                    <EventCard 
+                      key={event.id} 
+                      event={event.eventData}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Past Events Section */}
+            {pastEvents.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#4A3F74] mb-4">Past Events</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {pastEvents.map((event) => (
+                    <EventCard 
+                      key={event.id} 
+                      event={event}
+                      isRecentEvent={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

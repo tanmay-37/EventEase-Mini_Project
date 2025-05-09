@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const MyRegisteredEvents = () => {
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [recentEvents, setRecentEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [showAll, setShowAll] = useState(false);
@@ -17,83 +18,114 @@ const MyRegisteredEvents = () => {
   useEffect(() => {
     if (!user || !user.uid) return;
 
-    const fetchRegisteredEvents = async () => {
+    const fetchAllEvents = async () => {
       try {
-        console.log("Fetching registered events for user:", user.uid);
+        setLoading(true);
 
-        // Step 1: Fetch registrations where userId matches
-        const q = query(collection(db, "registrations"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
+        // Fetch current registrations
+        const registrationsQuery = query(
+          collection(db, "registrations"), 
+          where("userId", "==", user.uid)
+        );
+        const registrationsSnap = await getDocs(registrationsQuery);
 
-        if (querySnapshot.empty) {
-          console.log("No registered events found for this user.");
-          setRegisteredEvents([]);
-          setLoading(false);
-          return;
-        }
+        const currentEvents = [];
+        for (const regDoc of registrationsSnap.docs) {
+          const regData = regDoc.data();
+          if (!regData.eventId) continue;
 
-        // Step 2: Extract event IDs
-        const eventRegistrations = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          eventId: doc.data().eventId,
-          ...doc.data(),
-        }));
-
-        console.log("User's registered events (raw):", eventRegistrations);
-
-        // Step 3: Fetch event details
-        const validEvents = [];
-        for (const reg of eventRegistrations) {
-          if (!reg.eventId) continue; // Skip if eventId is missing
-
-          const eventRef = doc(db, "events", reg.eventId);
-          const eventDoc = await getDoc(eventRef);
-
+          const eventDoc = await getDoc(doc(db, "events", regData.eventId));
           if (eventDoc.exists()) {
-            validEvents.push({
-              ...reg,
-              eventData: eventDoc.data(),
+            currentEvents.push({
+              id: regDoc.id,
+              eventData: { id: eventDoc.id, ...eventDoc.data() },
+              ...regData
             });
           }
         }
 
-        console.log("Filtered valid events:", validEvents);
-        setRegisteredEvents(validEvents);
+        // Fetch recent (completed) events
+        const recentEventsQuery = query(
+          collection(db, "recentEvents"), 
+          where("userId", "==", user.uid)
+        );
+        const recentEventsSnap = await getDocs(recentEventsQuery);
+        const completedEvents = recentEventsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          isRecent: true
+        }));
+
+        setRegisteredEvents(currentEvents);
+        setRecentEvents(completedEvents);
+
       } catch (error) {
-        setErrorMessage("Failed to fetch registered events. Please try again.");
-        console.error("Error fetching registered events:", error);
+        console.error("Error fetching events:", error);
+        setErrorMessage("Failed to fetch events. Please try again.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRegisteredEvents();
+    fetchAllEvents();
   }, [user]);
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
+    <div className="p-4 bg-white shadow-md rounded-lg relative">
       <h2 className="text-xl font-bold mb-3">My Registered Events</h2>
 
       {loading ? (
         <Spinner />
       ) : errorMessage ? (
         <p className="text-red-500">{errorMessage}</p>
-      ) : registeredEvents.length === 0 ? (
+      ) : registeredEvents.length === 0 && recentEvents.length === 0 ? (
         <p>No events registered yet.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {registeredEvents.slice(0, showAll ? registeredEvents.length : 2).map((event) => (
-            <EventCard key={event.id} event={{ id: event.eventId, ...event.eventData }} />
-          ))}
-
-          {registeredEvents.length > 2 && !showAll && (
-            <button
-              onClick={() => navigate("/explore-all-events")}
-              className="mt-3 px-4 py-2 bg-[#A084E8] text-white rounded-md hover:bg-[#8C72D4"
-            >
-              Explore All Your Past Events
-            </button>
+        <div className="space-y-6">
+          {/* Current Events Section */}
+          {registeredEvents.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-[#4A3F74] mb-3">
+                Current Events
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {registeredEvents.slice(0, 2).map((event) => (
+                  <div key={event.id} className="relative z-10">
+                    <EventCard 
+                      event={event.eventData}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
+
+          {/* Recent Events Section */}
+          {recentEvents.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-[#4A3F74] mb-3">
+                Completed Events
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {recentEvents.slice(0, 2).map((event) => (
+                  <div key={event.id} className="relative z-10">
+                    <EventCard 
+                      event={event} 
+                      isRecentEvent={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Explore All Events Button */}
+          <button
+            onClick={() => navigate("/explore-all-events")}
+            className="mt-4 px-4 py-2 bg-[#A084E8] text-white rounded-md hover:bg-[#8C72D4] w-full z-20 relative pointer-events-auto"
+          >
+            Explore All Your Events
+          </button>
         </div>
       )}
     </div>

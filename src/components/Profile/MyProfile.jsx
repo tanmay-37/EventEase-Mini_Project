@@ -72,90 +72,110 @@ const MyProfile = () => {
     return <p className="text-center mt-5">🔄 Loading profile...</p>;
   }
 
-  return (
-    <div className="max-w-md mx-auto bg-white shadow-md rounded-lg p-6 mt-10">
-      {/* Header with Single Edit Button */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">My Profile</h2>
-        <button 
-          onClick={() => setIsEditing(!isEditing)} 
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
-        >
-          {isEditing ? "Cancel" : "Edit"}
-        </button>
-      </div>
+   return (
+    <div className="min-h-screen p-6 bg-[#F5F3FF]"
+      style={{
+        backgroundImage: "url('/images/doodad.png')",
+        backgroundSize: "500px",
+        backgroundPosition: "left",
+      }}>
+      <div className="max-w-2xl mx-auto bg-white/30 backdrop-blur-lg shadow-xl rounded-2xl p-8 mt-10 border border-white/30">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold text-[#4A3F74]">My Profile</h2>
+          <button 
+            onClick={() => setIsEditing(!isEditing)} 
+            className="px-4 py-2 bg-[#A084E8] hover:bg-[#8C72D4] text-white rounded-lg transition-colors shadow-md"
+          >
+            {isEditing ? "Cancel" : "Edit"}
+          </button>
+        </div>
 
-      {/* First Name */}
-      <div className="mb-3">
-        <p className="text-gray-600 font-semibold">First Name:</p>
-        {isEditing ? (
-          <input 
-            type="text"
-            name="firstName"
-            value={editableProfile.firstName} 
-            onChange={handleChange}
-            className="w-full border rounded px-2 py-1 mt-1"
-          />
-        ) : (
-          <p className="text-gray-900">{profile.firstName || "N/A"}</p>
-        )}
-      </div>
+        {/* Profile Fields */}
+        <div className="space-y-6">
+          {/* First Name */}
+          <div className="relative">
+            <p className="text-[#4A3F74] font-semibold mb-1">First Name</p>
+            {isEditing ? (
+              <input 
+                type="text"
+                name="firstName"
+                value={editableProfile.firstName} 
+                onChange={handleChange}
+                className="w-full bg-white/50 border border-[#A084E8]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#A084E8] transition-colors"
+              />
+            ) : (
+              <p className="px-4 py-2 bg-white/50 rounded-lg text-[#4A3F74]">
+                {profile.firstName || "N/A"}
+              </p>
+            )}
+          </div>
 
-      {/* Last Name */}
-      <div className="mb-3">
-        <p className="text-gray-600 font-semibold">Last Name:</p>
-        {isEditing ? (
-          <input 
-            type="text"
-            name="lastName"
-            value={editableProfile.lastName} 
-            onChange={handleChange}
-            className="w-full border rounded px-2 py-1 mt-1"
-          />
-        ) : (
-          <p className="text-gray-900">{profile.lastName || "N/A"}</p>
-        )}
-      </div>
+          {/* Last Name */}
+          <div className="relative">
+            <p className="text-[#4A3F74] font-semibold mb-1">Last Name</p>
+            {isEditing ? (
+              <input 
+                type="text"
+                name="lastName"
+                value={editableProfile.lastName} 
+                onChange={handleChange}
+                className="w-full bg-white/50 border border-[#A084E8]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#A084E8] transition-colors"
+              />
+            ) : (
+              <p className="px-4 py-2 bg-white/50 rounded-lg text-[#4A3F74]">
+                {profile.lastName || "N/A"}
+              </p>
+            )}
+          </div>
 
-      {/* Username (or Host Name) */}
-      <div className="mb-3">
-        <p className="text-gray-600 font-semibold">
-          {userType === "host" ? "Host Name" : "Username"}:
-        </p>
-        {isEditing ? (
-          <input 
-            type="text"
-            name="userName"
-            value={editableProfile.userName} 
-            onChange={handleChange}
-            className="w-full border rounded px-2 py-1 mt-1"
-          />
-        ) : (
-          <p className="text-gray-900">{editableProfile.userName || "N/A"}</p>
-        )}
-      </div>
+          {/* Username/Host Name */}
+          <div className="relative">
+            <p className="text-[#4A3F74] font-semibold mb-1">
+              {userType === "host" ? "Host Name" : "Username"}
+            </p>
+            {isEditing ? (
+              <input 
+                type="text"
+                name="userName"
+                value={editableProfile.userName} 
+                onChange={handleChange}
+                className="w-full bg-white/50 border border-[#A084E8]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#A084E8] transition-colors"
+              />
+            ) : (
+              <p className="px-4 py-2 bg-white/50 rounded-lg text-[#4A3F74]">
+                {profile.userName || "N/A"}
+              </p>
+            )}
+          </div>
 
-      {/* Email (Non-editable) */}
-      <div className="mb-3">
-        <p className="text-gray-600 font-semibold">Email:</p>
-        <p className="text-gray-900">{profile.email}</p>
-      </div>
+          {/* Email */}
+          <div className="relative">
+            <p className="text-[#4A3F74] font-semibold mb-1">Email</p>
+            <p className="px-4 py-2 bg-white/50 rounded-lg text-[#4A3F74]">
+              {profile.email}
+            </p>
+          </div>
 
-      {/* Designation */}
-      <div className="mb-3">
-        <p className="text-gray-600 font-semibold">Designation:</p>
-        <p className="text-gray-900 capitalize">{userType}</p> 
-      </div>
+          {/* Designation */}
+          <div className="relative">
+            <p className="text-[#4A3F74] font-semibold mb-1">Designation</p>
+            <p className="px-4 py-2 bg-white/50 rounded-lg text-[#4A3F74] capitalize">
+              {userType}
+            </p>
+          </div>
 
-      {/* Save Button */}
-      {isEditing && isModified && (
-        <button 
-          onClick={handleSave} 
-          className="bg-purple-500 text-white px-4 py-2 rounded mt-3 hover:bg-purple-700 w-full"
-        >
-          Save Changes
-        </button>
-      )}
+          {/* Save Button */}
+          {isEditing && isModified && (
+            <button 
+              onClick={handleSave}
+              className="w-full bg-[#A084E8] hover:bg-[#8C72D4] text-white py-3 rounded-lg mt-6 font-semibold shadow-md transition-colors"
+            >
+              Save Changes
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

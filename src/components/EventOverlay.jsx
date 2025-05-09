@@ -11,7 +11,7 @@ const EventOverlay = ({ title, isHost, isRegistered, onRegister, onViewDetails, 
                  rounded-xl flex flex-col justify-center items-center text-[#4A3F74] 
                  text-center opacity-0 group-hover:opacity-100 
                  group-hover:bottom-[-40px] scale-95 group-hover:scale-100 
-                 transition-all duration-300 -translate-x-1/2 z-[5] p-4 overflow-hidden"
+                 transition-all duration-300 -translate-x-1/2 z-[50] p-4 overflow-hidden"
     >
       <h3 className="text-lg font-bold px-2 max-w-full truncate text-[#4A3F74]">
         {title}

@@ -76,14 +76,14 @@ const EventCard = ({ event }) => {
         )}
 
         {isHost && (
-          <div className="flex items-center gap-2 text-gray-700 mt-4">
-            <FiUsers className="text-purple-500 text-lg" />
-            <p className="text-lg font-semibold">
-              {event.registrations ?? 0}{" "}
-              {event.registrations === 1 ? "Registration" : "Registrations"}
-            </p>
-          </div>
-        )}
+        <div className="flex items-center gap-2 text-gray-700 mt-4">
+          <FiUsers className="text-purple-500 text-lg" />
+          <p className="text-lg font-semibold">
+            {event.registrationCount || 0}{" "}
+            {(event.registrationCount === 1) ? "Registration" : "Registrations"}
+          </p>
+        </div>
+      )}
       </div>
 
       {/* Event Overlay */}

@@ -4,67 +4,120 @@ import { db } from "../../firebase";
 import EventCard from "../Card";
 import Logout from "../Logout";
 import { UserAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Spinner from "../Spinner";
 
 const MyCreatedEvents = () => {
-  const [events, setEvents] = useState([]);
+  const [currentEvents, setCurrentEvents] = useState([]);
+  const [completedEvents, setCompletedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const { user } = UserAuth(); 
+  const { user } = UserAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
 
-    const fetchHostEvents = async () => {
+    const fetchAllEvents = async () => {
       try {
-        const q = query(collection(db, "events"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
-        const eventsArray = querySnapshot.docs.map((doc) => ({
+        setLoading(true);
+
+        // Fetch current/ongoing events
+        const currentEventsQuery = query(
+          collection(db, "events"), 
+          where("userId", "==", user.uid)
+        );
+        const currentEventsSnap = await getDocs(currentEventsQuery);
+        const currentEventsList = currentEventsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setCurrentEvents(currentEventsList);
+
+        // Fetch completed events
+        const completedEventsQuery = query(
+          collection(db, "recentEvents"), 
+          where("userId", "==", user.uid)
+        );
+        const completedEventsSnap = await getDocs(completedEventsQuery);
+        const completedEventsList = completedEventsSnap.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
+          isRecent: true
         }));
-        setEvents(eventsArray);
+        setCompletedEvents(completedEventsList);
+
       } catch (error) {
         setErrorMessage("Failed to fetch events. Please try again.");
-        console.error("Error fetching host events:", error);
+        console.error("Error fetching events:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHostEvents();
+    fetchAllEvents();
   }, [user]);
 
   return (
-    <div>
-      <section className="min-h-screen bg-gray-100 py-10 px-5 md:px-20 relative overflow-visible bg-purple-100"
-        style={{
+    <div className="min-h-screen bg-[#F5F3FF] py-10 px-5 md:px-20"
+      style={{
         backgroundImage: "url('/images/doodad.png')",
         backgroundSize: "500px",
         backgroundPosition: "left",
-        height: "100%",
-        width: "100%",
       }}>
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          My Hosted Events
-        </h2>
+      <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <button 
+          onClick={() => navigate("/host-dashboard")}
+          className="mb-6 px-4 py-2 bg-[#A084E8] text-white rounded-lg hover:bg-[#8C72D4] transition-colors"
+        >
+          ⬅ Back to Dashboard
+        </button>
 
         {loading ? (
-          <p className="text-center text-gray-600">Loading events...</p>
+          <div className="flex justify-center">
+            <Spinner />
+          </div>
         ) : errorMessage ? (
           <p className="text-center text-red-500">{errorMessage}</p>
-        ) : events.length === 0 ? (
-          <p className="text-center text-gray-600">No events found.</p>
+        ) : currentEvents.length === 0 && completedEvents.length === 0 ? (
+          <p className="text-center text-gray-600">No events created yet.</p>
         ) : (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 list-none p-0 relative overflow-visible">
-            {events.map((event) => (
-              <li key={event.id} className="flex justify-center relative overflow-visible">
-                <EventCard event={event} />
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-8">
+            {/* Ongoing Events Section */}
+            {currentEvents.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#4A3F74] mb-4">Ongoing Events</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {currentEvents.map((event) => (
+                    <div key={event.id} className="flex justify-center">
+                      <EventCard event={event} isHost={true} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Completed Events Section */}
+            {completedEvents.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#4A3F74] mb-4">Completed Events</h2>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {completedEvents.map((event) => (
+                    <div key={event.id} className="flex justify-center">
+                      <EventCard 
+                        event={event} 
+                        isHost={true}
+                        isRecentEvent={true}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
-      </section>
-      <Logout />
+      </div>
     </div>
   );
 };

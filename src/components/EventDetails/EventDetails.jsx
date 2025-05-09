@@ -104,13 +104,16 @@ const EventDetails = () => {
         )}
 
         {isHost && (
-          <div className="flex items-center gap-2 text-gray-700 mt-6">
-            <FiUsers className="text-purple-500 text-xl" />
-            <p className="text-lg font-medium">
-              {event.registrations ?? 0} {event.registrations === 1 ? "Registration" : "Registrations"}
-            </p>
+          <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+            <div className="flex items-center gap-2 text-gray-700">
+              <FiUsers className="text-purple-500 text-xl" />
+              <p className="text-lg font-medium">
+                {event.registrationCount || 0} {" "}
+                {event.registrationCount === 1 ? "Registration" : "Registrations"}
+              </p>
+            </div>
           </div>
-        )}
+      )}
 
         <div className="mt-8 flex justify-between">
           {!isHost && (

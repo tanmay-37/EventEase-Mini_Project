@@ -1,53 +1,79 @@
-import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { UserAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const EventManagement = () => {
   const { user } = UserAuth();
-  const navigate = useNavigate(); 
-  const [events, setEvents] = useState([]);
-  const [deletedEvent, setDeletedEvent] = useState(null);
-  const [undoTimeout, setUndoTimeout] = useState(null);
+  const navigate = useNavigate();
+  const [currentEvents, setCurrentEvents] = useState([]);
+  const [completedEvents, setCompletedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
 
-    const fetchEvents = async () => {
+    const fetchAllEvents = async () => {
       try {
-        // Fetch events
-        const eventsQuery = query(collection(db, "events"), where("userId", "==", user.uid));
-        const eventsSnapshot = await getDocs(eventsQuery);
+        // Fetch current events with registration counts
+        const currentEventsQuery = query(
+          collection(db, "events"),
+          where("userId", "==", user.uid)
+        );
+        const currentEventsSnap = await getDocs(currentEventsQuery);
         
-        // Get registration counts for each event
-        const eventsWithRegistrations = await Promise.all(
-          eventsSnapshot.docs.map(async (eventDoc) => {
+        const currentEventsList = await Promise.all(
+          currentEventsSnap.docs.map(async (doc) => {
             const registrationsQuery = query(
               collection(db, "registrations"),
-              where("eventId", "==", eventDoc.id)
+              where("eventId", "==", doc.id)
             );
-            const registrationsSnapshot = await getDocs(registrationsQuery);
+            const registrationsSnap = await getDocs(registrationsQuery);
             
             return {
-              id: eventDoc.id,
-              ...eventDoc.data(),
-              registrationCount: registrationsSnapshot.size
+              id: doc.id,
+              ...doc.data(),
+              registrationCount: registrationsSnap.size
             };
           })
         );
+        setCurrentEvents(currentEventsList);
 
-        setEvents(eventsWithRegistrations);
+        // Fetch completed events with registration counts
+        const completedEventsQuery = query(
+          collection(db, "recentEvents"),
+          where("userId", "==", user.uid)
+        );
+        const completedEventsSnap = await getDocs(completedEventsQuery);
+        
+        const completedEventsList = await Promise.all(
+          completedEventsSnap.docs.map(async (doc) => {
+            const registrationsQuery = query(
+              collection(db, "registrations"),
+              where("eventId", "==", doc.originalEventId || doc.id)
+            );
+            const registrationsSnap = await getDocs(registrationsQuery);
+            
+            return {
+              id: doc.id,
+              ...doc.data(),
+              registrationCount: registrationsSnap.size,
+              isCompleted: true
+            };
+          })
+        );
+        setCompletedEvents(completedEventsList);
+
       } catch (error) {
         console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchEvents();
-    return () => clearTimeout(undoTimeout);
+    fetchAllEvents();
   }, [user]);
-
-  // ...existing handleDelete and handleUndo functions...
 
   return (
     <div className="p-6 bg-white/30 backdrop-blur-lg shadow-lg border border-white/30 rounded-2xl">
@@ -55,40 +81,51 @@ const EventManagement = () => {
         <h2 className="text-xl font-semibold text-[#4A3F74]">Events Hosted</h2>
         <button 
           onClick={() => navigate("/my-created-events")} 
-          className="bg-[#A084E8] hover:bg-[#8C72D4] text-white px-4 py-2 rounded-lg transition"
+          className="text-[#A084E8] hover:text-[#8C72D4] font-medium"
         >
-          Explore Your Events
+          View All →
         </button>
       </div>
 
-      <ul className="space-y-2">
-        {events.map(event => (
-          <li key={event.id} className="flex justify-between items-center p-3 bg-white/50 rounded-lg border-b border-white/40">
-            <div className="flex flex-col">
-              <span className="font-medium text-[#4A3F74]">{event.title}</span>
-              <span className="text-sm text-purple-600">
-                {event.registrationCount || 0} {event.registrationCount === 1 ? 'Registration' : 'Registrations'}
+      {loading ? (
+        <p>Loading...</p>
+      ) : (currentEvents.length === 0 && completedEvents.length === 0) ? (
+        <p className="text-gray-500">No events created yet</p>
+      ) : (
+        <div className="space-y-4">
+          {/* Current Events */}
+          {currentEvents.slice(0, 3).map(event => (
+            <div key={event.id} 
+              className="p-3 bg-white/50 rounded-lg flex justify-between items-center"
+            >
+              <div className="flex-1">
+                <h3 className="font-medium text-[#4A3F74]">{event.title}</h3>
+                <span className="text-sm text-purple-600">
+                  {event.registrationCount || 0} registrations
+                </span>
+              </div>
+              <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">
+                Active
               </span>
             </div>
-            <button 
-              onClick={() => handleDelete(event.id)} 
-              className="bg-[#A084E8] hover:bg-[#8C72D4] text-white px-4 py-2 rounded-lg transition"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+          ))}
 
-      {deletedEvent && (
-        <div className="mt-4 p-2 bg-yellow-100 text-yellow-800 rounded-lg flex justify-between">
-          <p>Event "{deletedEvent.title}" deleted!</p>
-          <button 
-            onClick={handleUndo} 
-            className="text-blue-500 font-semibold"
-          >
-            Undo
-          </button>
+          {/* Completed Events */}
+          {completedEvents.slice(0, 3).map(event => (
+            <div key={event.id} 
+              className="p-3 bg-white/50 rounded-lg flex justify-between items-center"
+            >
+              <div className="flex-1">
+                <h3 className="font-medium text-[#4A3F74]">{event.title}</h3>
+                <span className="text-sm text-purple-600">
+                  {event.registrationCount || 0} registrations
+                </span>
+              </div>
+              <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                Completed
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -12,47 +12,78 @@ import {
 
 export const cleanupExpiredEvents = async () => {
   try {
-    // Get all events
+    console.log("Starting cleanup process...");
     const eventsRef = collection(db, "events");
     const eventsSnapshot = await getDocs(eventsRef);
-    const currentDate = new Date();
+    const currentDateTime = new Date();
+
+    console.log(`Found ${eventsSnapshot.docs.length} events to check`);
 
     for (const eventDoc of eventsSnapshot.docs) {
       const eventData = eventDoc.data();
-      const endDate = new Date(eventData.endDate);
+      console.log("Checking event:", eventData.title);
 
-      // Check if event has expired
-      if (endDate < currentDate) {
-        // Store in pastCreatedEvents for host
-        await addDoc(collection(db, "pastCreatedEvents"), {
-          ...eventData,
-          originalEventId: eventDoc.id,
-          archivedAt: Timestamp.now()
-        });
+      const eventStartDate = new Date(eventData.startDate);
+      const eventStartTime = eventData.startTime;
+      
+      // Convert event time to Date object
+      const [hours, minutes] = eventStartTime.split(':');
+      eventStartDate.setHours(parseInt(hours), parseInt(minutes));
 
-        // Store in recentEvents for users who registered
-        const registrationsRef = collection(db, "registrations");
-        const registrationsQuery = query(registrationsRef, where("eventId", "==", eventDoc.id));
-        const registrationsSnapshot = await getDocs(registrationsQuery);
+      // Add 2 hours to event start time
+      const eventEndDateTime = new Date(eventStartDate.getTime() + (2 * 60 * 60 * 1000));
 
-        for (const regDoc of registrationsSnapshot.docs) {
-          const regData = regDoc.data();
+      console.log("Event start:", eventStartDate);
+      console.log("Event end (after 2 hours):", eventEndDateTime);
+      console.log("Current time:", currentDateTime);
+
+      if (currentDateTime > eventEndDateTime) {
+        console.log("Event expired, moving to recent events:", eventData.title);
+        
+        try {
+          // Store in recentEvents first
           await addDoc(collection(db, "recentEvents"), {
             ...eventData,
-            userId: regData.userId,
             originalEventId: eventDoc.id,
             archivedAt: Timestamp.now()
           });
-        }
 
-        // Delete the expired event
-        await deleteDoc(doc(db, "events", eventDoc.id));
+          // Get and process registrations
+          const registrationsRef = collection(db, "registrations");
+          const registrationsQuery = query(
+            registrationsRef, 
+            where("eventId", "==", eventDoc.id)
+          );
+          const registrationsSnapshot = await getDocs(registrationsQuery);
+
+          console.log(`Processing ${registrationsSnapshot.docs.length} registrations`);
+
+          // Update registrations
+          for (const regDoc of registrationsSnapshot.docs) {
+            const regData = regDoc.data();
+            await addDoc(collection(db, "recentEvents"), {
+              ...eventData,
+              userId: regData.userId,
+              registrationId: regDoc.id,
+              originalEventId: eventDoc.id,
+              archivedAt: Timestamp.now()
+            });
+          }
+
+          // Finally remove the original event
+          await deleteDoc(doc(db, "events", eventDoc.id));
+          console.log("Successfully moved event to recent events");
+        } catch (error) {
+          console.error("Error processing event:", error);
+        }
+      } else {
+        console.log("Event not expired yet");
       }
     }
 
     return true;
   } catch (error) {
-    console.error("Error cleaning up expired events:", error);
+    console.error("Error in cleanup process:", error);
     return false;
   }
 };

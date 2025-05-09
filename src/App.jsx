@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from "react";
+import { cleanupExpiredEvents } from './services/EventCleanupService';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import UserSignUp from './components/registration/UserSignUp';
 import UserLogin from './components/registration/UserLogin';
@@ -32,9 +34,17 @@ import PastEvents from './components/PastEvents/PastEvents.jsx';
 import RecentEvents from './components/PastEvents/RecentEvents.jsx';
 
 function App() {
-  useEffect(() => {
+useEffect(() => {
+    // Initial cleanup
     cleanupExpiredEvents();
-    const interval = setInterval(cleanupExpiredEvents, 24 * 60 * 60 * 1000);
+    
+    // Check every 15 minutes for expired events
+    const interval = setInterval(() => {
+      cleanupExpiredEvents();
+      console.log('Cleanup check performed at:', new Date().toLocaleString());
+    }, 15 * 60 * 1000);
+    
+    // Cleanup on component unmount
     return () => clearInterval(interval);
   }, []);
   return (

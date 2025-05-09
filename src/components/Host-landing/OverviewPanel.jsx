@@ -3,42 +3,27 @@
   import { db } from "../../firebase";
   import { UserAuth } from "../../context/AuthContext";
 
-  const OverviewPanel = () => {
-    const { user } = UserAuth();
-    const [data, setData] = useState({ events: 0, registrations: 0, revenue: 0 });
+import React from 'react';
+const OverviewPanel = ({ events }) => {
+  const totalRegistrations = events.reduce((total, event) => total + (event.registrationCount || 0), 0);
 
-    useEffect(() => {
-      if (!user) return;
-
-      // Firestore real-time listener
-      const q = query(collection(db, "events"), where("userId", "==", user.uid));
-
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const eventsCount = querySnapshot.docs.length;
-        let totalRevenue = 0, totalRegistrations = 0;
-
-        querySnapshot.docs.forEach(doc => {
-          totalRegistrations += doc.data().registrations || 0;
-          totalRevenue += doc.data().revenue || 0;
-        });
-
-        setData({ events: eventsCount, registrations: totalRegistrations, revenue: totalRevenue });
-      });
-
-      // Cleanup function to unsubscribe when component unmounts
-      return () => unsubscribe();
-    }, [user]);
-
-    return (
-      <div className="p-6 bg-white/30 backdrop-blur-lg shadow-lg border border-white/30 rounded-2xl">
-        <h2 className="text-xl font-semibold text-[#4A3F74]">Dashboard Overview</h2>
-        <p className="text-[#4A3F74] font-medium">Total Events: {data.events}</p>
-        <p className="text-[#4A3F74] font-medium">Total Registrations: {data.registrations}</p>
-        <p className="text-[#4A3F74] font-medium">
-          Revenue: ₹{new Intl.NumberFormat('en-IN').format(data.revenue)}
-        </p>
+  return (
+    <div className="p-6 bg-white/30 backdrop-blur-lg shadow-lg border border-white/30 rounded-2xl">
+      <h2 className="text-xl font-semibold text-[#4A3F74] mb-4">Dashboard Overview</h2>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-4 bg-purple-100 rounded-lg">
+          <h3 className="text-lg font-semibold text-[#4A3F74]">Total Events</h3>
+          <p className="text-2xl font-bold text-[#6a5ba7]">{events.length}</p>
+        </div>
+        
+        <div className="p-4 bg-purple-100 rounded-lg">
+          <h3 className="text-lg font-semibold text-[#4A3F74]">Total Registrations</h3>
+          <p className="text-2xl font-bold text-[#6a5ba7]">{totalRegistrations}</p>
+        </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
-  export default OverviewPanel;
+export default OverviewPanel;

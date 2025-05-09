@@ -3,6 +3,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import EventCard from "../Card";
 import Logout from "../Logout";
+import { Link } from "react-router-dom";
 import { UserAuth } from "../../context/AuthContext";
 import OverviewPanel from "./OverviewPannel";
 import MyRegisteredEvents from "./MyRegisteredEvents";
@@ -40,34 +41,35 @@ const UserDashboard = () => {
     fetchUserEvents();
   }, [user]);
 
-  return (
-    <div>
-      <div className="min-h-screen flex flex-col p-4 lg:p-6 bg-[#F5F3FF]"
+   return (
+    <div className="min-h-screen flex flex-col p-4 lg:p-6 bg-[#F5F3FF]"
       style={{
         backgroundImage: "url('/images/doodad.png')",
         backgroundSize: "500px",
         backgroundPosition: "left",
       }}>
-
-        // Add this in your navigation section
-<Link 
-  to="/user/recent-events"
-  className="text-[#4A3F74] hover:text-[#6a5ba7] transition-colors"
->
-  Recent Events
-</Link>
+      
+      {/* Main content */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
         <OverviewPanel />
         <MyRegisteredEvents />
       </div>
-      <div className="w-full flex justify-center mt-6 relative z-50 pointer-events-auto">
+
+      {/* Action buttons container */}
+      <div className="w-full flex justify-center gap-4 mt-6 relative z-50 pointer-events-auto">
         <button
           onClick={() => navigate("/discover")}
-          className="bg-[#A084E8] hover:bg-[#8C72D4] text-white px-6 py-2 rounded-lg font-semibold shadow-md w-full max-w-[300px] sm:w-auto">
+          className="bg-[#A084E8] hover:bg-[#8C72D4] text-white px-6 py-2 rounded-lg font-semibold shadow-md w-full max-w-[300px] sm:w-auto"
+        >
           Browse New Events
         </button>
+        <button
+          onClick={() => navigate("/user/recent-events")}
+          className="bg-white/50 hover:bg-white/70 backdrop-blur-sm text-[#4A3F74] px-6 py-2 rounded-lg font-semibold shadow-md w-full max-w-[300px] sm:w-auto border border-[#A084E8]/30"
+        >
+          Recent Events
+        </button>
       </div>
-    </div>
     </div>
   );
 };

@@ -13,20 +13,35 @@ const HostDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const { user } = UserAuth(); 
+  const { user } = UserAuth();
 
   useEffect(() => {
     if (!user) return;
 
     const fetchHostEvents = async () => {
       try {
-        const q = query(collection(db, "events"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
-        const eventsArray = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setEvents(eventsArray);
+        // Fetch events
+        const eventsQuery = query(collection(db, "events"), where("userId", "==", user.uid));
+        const eventsSnapshot = await getDocs(eventsQuery);
+        
+        // Get registration counts for each event
+        const eventsWithRegistrations = await Promise.all(
+          eventsSnapshot.docs.map(async (eventDoc) => {
+            const registrationsQuery = query(
+              collection(db, "registrations"),
+              where("eventId", "==", eventDoc.id)
+            );
+            const registrationsSnapshot = await getDocs(registrationsQuery);
+            
+            return {
+              id: eventDoc.id,
+              ...eventDoc.data(),
+              registrationCount: registrationsSnapshot.size
+            };
+          })
+        );
+
+        setEvents(eventsWithRegistrations);
       } catch (error) {
         setErrorMessage("Failed to fetch events. Please try again.");
         console.error("Error fetching host events:", error);
@@ -38,22 +53,18 @@ const HostDashboard = () => {
     fetchHostEvents();
   }, [user]);
 
+  if (loading) return <Spinner />;
+
   return (
     <div className="min-h-screen flex flex-col p-4 lg:p-6 bg-[#F5F3FF]"
-    style={{
+      style={{
         backgroundImage: "url('/images/doodad.png')",
         backgroundSize: "500px",
         backgroundPosition: "left",
       }}>
-        <Link 
-              to="/host/past-events" 
-              className="text-[#4A3F74] hover:text-[#6a5ba7] transition-colors font-medium"
-            >
-              Past Events
-            </Link>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
-          <OverviewPanel />
-          <EventManagement />
+        <OverviewPanel events={events} />
+        <EventManagement events={events} />
         <div className="md:col-span-2">
           <CreateEventBtn />
         </div>

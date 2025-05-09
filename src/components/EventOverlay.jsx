@@ -1,10 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const EventOverlay = ({ title, isHost, isRegistered, onRegister, onViewDetails, id }) => {
+const EventOverlay = ({ title, isHost, isRegistered, onRegister, onViewDetails, id, isRecentEvent }) => {
   const navigate = useNavigate();
-
-  console.log("isRegistered:", isRegistered); // Debugging
 
   return (
     <div
@@ -19,7 +17,22 @@ const EventOverlay = ({ title, isHost, isRegistered, onRegister, onViewDetails, 
         {title}
       </h3>
 
-      {isHost || isRegistered ? ( // If host or registered, show "View Details"
+      {isRecentEvent ? (
+        <div className="mt-3 flex flex-col gap-2">
+          <button
+            onClick={onViewDetails}
+            className="bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 
+                     font-semibold py-2 px-6 text-lg rounded-lg shadow-md 
+                     hover:shadow-xl hover:from-[#8C72D4] hover:to-[#705EBB] 
+                     transition-all duration-300"
+          >
+            View Details
+          </button>
+          <span className="text-sm text-[#4A3F74] font-medium">
+            Event Completed
+          </span>
+        </div>
+      ) : isHost || isRegistered ? (
         <button
           onClick={onViewDetails}
           className="mt-3 bg-gradient-to-r from-[#A084E8] to-[#8C72D4] text-white 

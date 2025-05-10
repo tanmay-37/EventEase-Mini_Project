@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const MyRegisteredEvents = () => {
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [recentEvents, setRecentEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [showAll, setShowAll] = useState(false);
@@ -17,83 +18,139 @@ const MyRegisteredEvents = () => {
   useEffect(() => {
     if (!user || !user.uid) return;
 
-    const fetchRegisteredEvents = async () => {
+    const fetchAllEvents = async () => {
       try {
-        console.log("Fetching registered events for user:", user.uid);
+        setLoading(true);
 
-        // Step 1: Fetch registrations where userId matches
-        const q = query(collection(db, "registrations"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
+        // Fetch current registrations
+        const registrationsQuery = query(
+          collection(db, "registrations"), 
+          where("userId", "==", user.uid)
+        );
+        const registrationsSnap = await getDocs(registrationsQuery);
 
-        if (querySnapshot.empty) {
-          console.log("No registered events found for this user.");
-          setRegisteredEvents([]);
-          setLoading(false);
-          return;
-        }
+        const currentEvents = [];
+        for (const regDoc of registrationsSnap.docs) {
+          const regData = regDoc.data();
+          if (!regData.eventId) continue;
 
-        // Step 2: Extract event IDs
-        const eventRegistrations = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          eventId: doc.data().eventId,
-          ...doc.data(),
-        }));
-
-        console.log("User's registered events (raw):", eventRegistrations);
-
-        // Step 3: Fetch event details
-        const validEvents = [];
-        for (const reg of eventRegistrations) {
-          if (!reg.eventId) continue; // Skip if eventId is missing
-
-          const eventRef = doc(db, "events", reg.eventId);
-          const eventDoc = await getDoc(eventRef);
-
+          const eventDoc = await getDoc(doc(db, "events", regData.eventId));
           if (eventDoc.exists()) {
-            validEvents.push({
-              ...reg,
-              eventData: eventDoc.data(),
+            currentEvents.push({
+              id: regDoc.id,
+              eventData: { id: eventDoc.id, ...eventDoc.data() },
+              ...regData
             });
           }
         }
 
-        console.log("Filtered valid events:", validEvents);
-        setRegisteredEvents(validEvents);
+        // Fetch recent (completed) events
+        const recentEventsQuery = query(
+          collection(db, "recentEvents"), 
+          where("userId", "==", user.uid)
+        );
+        const recentEventsSnap = await getDocs(recentEventsQuery);
+        const completedEvents = recentEventsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          isRecent: true
+        }));
+
+        setRegisteredEvents(currentEvents);
+        setRecentEvents(completedEvents);
+
       } catch (error) {
-        setErrorMessage("Failed to fetch registered events. Please try again.");
-        console.error("Error fetching registered events:", error);
+        console.error("Error fetching events:", error);
+        setErrorMessage("Failed to fetch events. Please try again.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRegisteredEvents();
+    fetchAllEvents();
   }, [user]);
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-bold mb-3">My Registered Events</h2>
+    <div className="bg-[#1E293B]/80 backdrop-blur-md rounded-xl border border-[#38BDF8]/20 p-6 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#38BDF8]/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#F59E0B]/10 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Header */}
+      <h2 className="text-2xl font-bold text-[#F1F5F9] mb-6 relative">
+        My Registered Events
+        <div className="absolute -bottom-2 left-0 h-1 w-24 bg-gradient-to-r from-[#38BDF8] to-[#F59E0B] rounded-full"></div>
+      </h2>
 
       {loading ? (
-        <Spinner />
+        <div className="flex justify-center items-center min-h-[200px]">
+          <Spinner />
+        </div>
       ) : errorMessage ? (
-        <p className="text-red-500">{errorMessage}</p>
-      ) : registeredEvents.length === 0 ? (
-        <p>No events registered yet.</p>
+        <div className="p-4 bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-xl">
+          <p className="text-[#EF4444] text-center">{errorMessage}</p>
+        </div>
+      ) : registeredEvents.length === 0 && recentEvents.length === 0 ? (
+        <div className="p-6 bg-[#0F172A]/50 backdrop-blur-sm rounded-xl border border-[#38BDF8]/20">
+          <p className="text-[#F1F5F9]/70 text-center">No events registered yet.</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {registeredEvents.slice(0, showAll ? registeredEvents.length : 2).map((event) => (
-            <EventCard key={event.id} event={{ id: event.eventId, ...event.eventData }} />
-          ))}
-
-          {registeredEvents.length > 2 && !showAll && (
-            <button
-              onClick={() => navigate("/explore-all-events")}
-              className="mt-3 px-4 py-2 bg-[#A084E8] text-white rounded-md hover:bg-[#8C72D4"
-            >
-              Explore All Your Past Events
-            </button>
+        <div className="space-y-8 relative z-10">
+          {/* Current Events Section */}
+          {registeredEvents.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-[#F1F5F9] relative inline-block">
+                Current Events
+                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-[#38BDF8]/40"></span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {registeredEvents.slice(0, 2).map((event) => (
+                  <div key={event.id} className="transform transition-all duration-300 hover:scale-[1.02]">
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-[#38BDF8] to-[#F59E0B] rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
+                      <EventCard event={event.eventData} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
+
+          {/* Recent Events Section */}
+          {recentEvents.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-[#F1F5F9] relative inline-block">
+                Completed Events
+                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-[#38BDF8]/40"></span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {recentEvents.slice(0, 2).map((event) => (
+                  <div key={event.id} className="transform transition-all duration-300 hover:scale-[1.02]">
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-[#38BDF8] to-[#F59E0B] rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
+                      <EventCard event={event} isRecentEvent={true} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Explore All Events Button */}
+          <button
+            onClick={() => navigate("/explore-all-events")}
+            className="w-full px-6 py-3 bg-gradient-to-r from-[#38BDF8] to-[#F59E0B] 
+              text-[#0F172A] font-semibold rounded-xl
+              shadow-[0_0_20px_rgba(56,189,248,0.3)]
+              hover:shadow-[0_0_25px_rgba(56,189,248,0.5)]
+              transition-all duration-300 hover:scale-[1.02]
+              relative z-20 group overflow-hidden"
+          >
+            <span className="relative z-10">Explore All Your Events</span>
+            <div className="absolute inset-0 bg-white/20 group-hover:bg-transparent transition-colors duration-300"></div>
+          </button>
         </div>
       )}
     </div>

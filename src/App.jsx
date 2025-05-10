@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from "react";
+import { cleanupExpiredEvents } from './Services/EventCleanupService.js';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import UserSignUp from './components/registration/UserSignUp';
 import UserLogin from './components/registration/UserLogin';
@@ -28,8 +30,23 @@ import EventCreation from "./components/Host-landing/EventCreation.jsx"
 import UserDashboard from "./components/User-landing/UserDashboard.jsx";
 import ExplorePastEvents from "./components/User-landing/ExplorePastEvents.jsx"
 import MyProfile from "./components/Profile/MyProfile.jsx" 
+import PastEvents from "./components/PastEvents/PastEvents.jsx";
+import RecentEvents from "./components/PastEvents/RecentEvents.jsx";
 
 function App() {
+useEffect(() => {
+    // Initial cleanup
+    cleanupExpiredEvents();
+    
+    // Check every 15 minutes for expired events
+    const interval = setInterval(() => {
+      cleanupExpiredEvents();
+      console.log('Cleanup check performed at:', new Date().toLocaleString());
+    }, 15 * 60 * 1000);
+    
+    // Cleanup on component unmount
+    return () => clearInterval(interval);
+  }, []);
   return (
     <EventProvider>
       <Router basename="/">
@@ -66,6 +83,16 @@ function App() {
                   path="/host-dashboard" 
                   element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
                 />
+                <Route path="/host/past-events" element={
+                <ProtectedRoute>
+                  <PastEvents />
+                </ProtectedRoute>
+              } />
+              <Route path="/user/recent-events" element={
+                <ProtectedRoute>
+                  <RecentEvents />
+                </ProtectedRoute>
+              } />
               </Routes>
             </main>
             <Footer />

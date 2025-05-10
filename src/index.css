@@ -6,10 +6,3 @@ body{
     margin : 0,   
 }
 
-@font-face {
-    font-family: 'Akira';
-    src: url('public/fonts/Akira Expanded Demo.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-  }
-  

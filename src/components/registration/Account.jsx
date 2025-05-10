@@ -30,37 +30,53 @@ useEffect(() => {
       }
     };
 
-  return (
-    <div className="max-w-[600px] mx-auto my-16 p-4 text-center">
-      <h1 className="text-3xl font-bold py-4">Account</h1>
-      
-      {user ? (
-        <div className="p-6 border rounded-lg shadow-lg bg-gray-100">
-          <p className="text-lg font-semibold text-gray-700">
-            <span className="text-gray-900">Email:</span> {user.email}
-          </p>
-          <p className="text-lg font-semibold text-gray-700 mt-2">
-            <span className="text-gray-900">Role:</span>{' '}
-            {userType ? (
-              <span className={userType === 'User' ? 'text-blue-600' : 'text-green-600'}>
-                {userType}
-              </span>
-            ) : (
-              'Loading...'
-            )}
-          </p>
-          <button 
-            onClick={handleLogout} 
-            className="mt-6 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded transition duration-300"
-          >
-            Logout
-          </button>
-        </div>
-      ) : (
-        <p className="text-xl text-red-500 font-semibold">No user logged in</p>
-      )}
-    </div>
-  );
+    return (
+      <div className="max-w-[600px] mx-auto my-16 p-4">
+        <h2 className="text-2xl font-bold text-[#F1F5F9] mb-6 relative inline-block">
+          Account Details
+          <div className="absolute -bottom-2 left-0 h-1 w-24 bg-gradient-to-r from-[#38BDF8] to-[#60A5FA] rounded-full"></div>
+        </h2>
+        
+        {user ? (
+          <div className="p-6 bg-[#1E293B]/80 backdrop-blur-md rounded-xl border border-[#38BDF8]/20">
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-[#94A3B8] text-sm">Email Address</label>
+                <p className="text-[#F1F5F9] font-medium">{user.email}</p>
+              </div>
+              
+              <div className="flex flex-col gap-1">
+                <label className="text-[#94A3B8] text-sm">Account Type</label>
+                {userType ? (
+                  <p className={`font-medium ${
+                    userType === 'User' 
+                      ? 'text-[#38BDF8]' 
+                      : 'text-[#60A5FA]'
+                  }`}>
+                    {userType}
+                  </p>
+                ) : (
+                  <p className="text-[#94A3B8]">Loading...</p>
+                )}
+              </div>
+            </div>
+  
+            <button 
+              onClick={handleLogout} 
+              className="mt-8 w-full bg-[#DC2626]/20 hover:bg-[#DC2626]/30 text-[#F1F5F9] 
+                border border-[#DC2626]/20 font-medium py-2 px-6 rounded-lg 
+                transition duration-300 backdrop-blur-sm"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="p-6 bg-[#1E293B]/80 backdrop-blur-md rounded-xl border border-[#38BDF8]/20">
+            <p className="text-[#DC2626] text-center">No user logged in</p>
+          </div>
+        )}
+      </div>
+    );
 };
 
 export default Account;

@@ -62,34 +62,94 @@ const HostSignUp = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className={`${reg.container} mx-4 md:mx-0`}>
-        <div className="flex flex-col justify-center relative text-center">
-          <h2 className="font-semibold">Host</h2>
-          <h1 className="text-2xl font-bold">Sign Up</h1>
-          <img src={LoginUnderline} alt="Underline" className="w-16 mt-1 self-center" />
+    <div className="flex justify-center items-center min-h-screen bg-[#0F172A] p-4">
+      <div className="w-full max-w-md p-8 bg-[#1E293B]/80 backdrop-blur-md rounded-xl border border-[#38BDF8]/20">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h2 className="text-[#94A3B8] text-lg font-medium">Host</h2>
+          <h1 className="text-3xl font-bold text-[#F1F5F9] mt-1 relative inline-block">
+            Sign Up
+            <div className="absolute -bottom-2 left-0 h-1 w-full bg-gradient-to-r from-[#38BDF8] to-[#60A5FA] rounded-full"></div>
+          </h1>
         </div>
 
-        <form className="mt-6 space-y-4 px-2 md:px-0" onSubmit={handleSubmit}>
-          <input type="text" name="hostName" placeholder="Host Name" value={hostName} onChange={(e) => setHostName(e.target.value)} className={`${reg.input}`} />
-          <input type="email" name="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={`${reg.input}`} />
-          <input type="password" name="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className={`${reg.input}`} />
-          <input type="password" name="cnfPwd" placeholder="Confirm Password" value={cnfPwd} onChange={(e) => setCnfPwd(e.target.value)} className={`${reg.input}`} />
-          <button type="submit" className={reg.loginBtnSelected}>
+        {/* Signup Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Host Name"
+            value={hostName}
+            onChange={(e) => setHostName(e.target.value)}
+            className="w-full px-4 py-3 bg-[#0F172A]/50 border border-[#38BDF8]/20 rounded-lg 
+              text-[#F1F5F9] placeholder-[#94A3B8] 
+              focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/50
+              transition duration-300"
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 bg-[#0F172A]/50 border border-[#38BDF8]/20 rounded-lg 
+              text-[#F1F5F9] placeholder-[#94A3B8] 
+              focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/50
+              transition duration-300"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 bg-[#0F172A]/50 border border-[#38BDF8]/20 rounded-lg 
+              text-[#F1F5F9] placeholder-[#94A3B8] 
+              focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/50
+              transition duration-300"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={cnfPwd}
+            onChange={(e) => setCnfPwd(e.target.value)}
+            className="w-full px-4 py-3 bg-[#0F172A]/50 border border-[#38BDF8]/20 rounded-lg 
+              text-[#F1F5F9] placeholder-[#94A3B8] 
+              focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/50
+              transition duration-300"
+            required
+          />
+          
+          <button
+            type="submit"
+            className="w-full py-3 px-4 bg-gradient-to-r from-[#38BDF8] to-[#60A5FA]
+              text-white font-medium rounded-lg
+              hover:opacity-90 transition duration-300
+              focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/50"
+          >
             Sign Up
           </button>
         </form>
 
-        {/* Already a host? Login Button */}
-        <div className="mt-4 text-center">
-          <p className="text-gray-600">Already a Host? 
-            <Link to="/host-login" className="text-blue-500 hover:underline ml-1">Login</Link>
+        {/* Login and User Signup Links */}
+        <div className="mt-6 space-y-4">
+          <p className="text-center text-[#94A3B8]">
+            Already a Host?{" "}
+            <Link 
+              to="/host-login" 
+              className="text-[#38BDF8] hover:text-[#60A5FA] transition duration-300"
+            >
+              Login
+            </Link>
           </p>
-        </div>
-        <div className="mt-4 text-center">
           <button 
             onClick={() => navigate("/signup")} 
-            className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+            className="w-full py-2 px-4 bg-[#0F172A]/50 
+              text-[#F1F5F9] font-medium rounded-lg
+              border border-[#38BDF8]/20
+              hover:bg-[#0F172A]/70 transition duration-300
+              focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/50"
+          >
             Are you a User?
           </button>
         </div>

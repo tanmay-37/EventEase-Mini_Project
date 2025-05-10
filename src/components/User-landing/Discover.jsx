@@ -110,90 +110,96 @@ const Discover = () => {
   }, [debouncedSearchTerm, allEvents]);
 
   return (
-    <>
-      <div
-        className="min-h-screen bg-[#F5F0FF] relative overflow-visible"
-        style={{
-          backgroundImage: "url('/images/doodad.png')",
-          backgroundSize: "500px",
-          backgroundPosition: "left",
-        }}
-      >
-        <section className="pt-10 px-5 md:px-20 pb-20">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-[#4A3F74] mb-6">
-              Discover Events
-            </h2>
+    <div className="min-h-screen bg-[#0F172A] relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-[#38BDF8] rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-[#F59E0B] rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-[#EF4444] rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+      </div>
 
-            <div className="max-w-2xl mx-auto">
-              <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-            </div>
+      <section className="relative pt-10 px-5 md:px-20 pb-20 z-10">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-[#F1F5F9] mb-8">
+            Discover Events
+            <div className="h-1 w-24 bg-gradient-to-r from-[#38BDF8] to-[#F59E0B] mx-auto mt-4 rounded-full"></div>
+          </h2>
+
+          <div className="max-w-2xl mx-auto">
+            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           </div>
+        </div>
 
-          {/* Trending Events */}
-          {trendingEvents.length > 0 && (
-            <section className="mt-20">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Trending Events
-              </h2>
-              <ul className="flex flex-row overflow-x-auto gap-5 -mt-10 w-full hide-scrollbar">
-                {trendingEvents.map((event, index) => (
-                  <li
-                    key={event.id}
-                    className="min-w-[230px] flex flex-row items-center"
-                  >
-                    <p
-                      className="mt-[22px] text-[190px] font-bebas text-transparent relative left-6"
-                      style={{
-                        WebkitTextStroke: "8px rgba(160, 132, 232, 0.7)",
-                        textWrap: "nowrap",
-                      }}
-                    >
-                      {index + 1}
-                    </p>
-                    <img
-                      src={event.image || '/images/event-placeholder.jpg'}
-                      alt={event.title}
-                      className="w-[170px] h-[200px] rounded-lg object-cover -ml-3.5 z-10"
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* All Events Section */}
-          <section>
-            <h2 className="text-2xl font-bold text-[#4A3F74] mb-6 text-center">
-              {debouncedSearchTerm ? "Search Results" : "All Events"}
+        {/* Trending Events */}
+        {trendingEvents.length > 0 && (
+          <section className="mt-20 backdrop-blur-lg bg-[#1E293B]/30 rounded-2xl p-8 border border-[#38BDF8]/20">
+            <h2 className="text-2xl font-bold text-[#F1F5F9] mb-8 flex items-center">
+              <span className="text-[#F59E0B] mr-2">🔥</span> Trending Events
             </h2>
+            <ul className="flex flex-row overflow-x-auto gap-5 pb-4 hide-scrollbar">
+              {trendingEvents.map((event, index) => (
+                <li
+                  key={event.id}
+                  className="min-w-[230px] flex flex-row items-center group"
+                >
+                  <p className="mt-[22px] text-[190px] font-bebas text-transparent relative left-6 transition-all duration-300 group-hover:scale-110"
+                    style={{
+                      WebkitTextStroke: "2px rgba(56, 189, 248, 0.3)",
+                    }}>
+                    {index + 1}
+                  </p>
+                  <img
+                    src={event.image || '/images/event-placeholder.jpg'}
+                    alt={event.title}
+                    className="w-[170px] h-[200px] rounded-lg object-cover -ml-3.5 z-10 
+                      shadow-lg transition-all duration-300 group-hover:scale-105 
+                      group-hover:shadow-[0_0_30px_rgba(56,189,248,0.2)]"
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
-            {loading ? (
-              <div className="flex justify-center">
-                <Spinner />
-              </div>
-            ) : errorMessage ? (
-              <p className="text-center text-[#FF6B6B]">{errorMessage}</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="transition-transform duration-300 hover:scale-[1.02]"
-                    onClick={() => trackSearch(event.id)}
-                  >
+        {/* All Events Section */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-bold text-[#F1F5F9] mb-8 text-center">
+            {debouncedSearchTerm ? "Search Results" : "All Events"}
+          </h2>
+
+          {loading ? (
+            <div className="flex justify-center">
+              <Spinner />
+            </div>
+          ) : errorMessage ? (
+            <p className="text-center text-[#EF4444] bg-[#EF4444]/10 py-4 rounded-lg">
+              {errorMessage}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {filteredEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="transform transition-all duration-300 hover:scale-[1.02]"
+                  onClick={() => trackSearch(event.id)}
+                >
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#38BDF8] to-[#F59E0B] 
+                      rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-300">
+                    </div>
                     <EventCard 
                       event={event} 
                       image={event.image || '/images/event-placeholder.jpg'}
                     />
                   </div>
-                ))}
-              </div>
-            )}
-          </section>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
-      </div>
-    </>
+      </section>
+    </div>
   );
 };
 

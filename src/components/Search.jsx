@@ -3,9 +3,12 @@ import React from 'react';
 const Search = ({ searchTerm, setSearchTerm }) => {
   return (
     <div className="w-full max-w-[600px] mx-auto px-4 py-2">
-      <div className="relative w-full">
+      <div className="relative w-full group">
+        {/* Search Icon */}
         <svg
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#4A3F74] opacity-80 transition-opacity duration-200 hover:opacity-100"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 
+            text-[#38BDF8] opacity-70 transition-opacity duration-200 
+            group-hover:opacity-100 z-10"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -19,13 +22,27 @@ const Search = ({ searchTerm, setSearchTerm }) => {
           />
         </svg>
 
+        {/* Search Input */}
         <input
           type="text"
           placeholder="Search through Events"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full py-3 pl-12 pr-4 text-[#4A3F74] bg-[#E9DAFF] rounded-full border-2 border-[#D1C2FF] focus:border-[#A084E8] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#D1C2FF] transition-all duration-300 shadow-sm"
+          className="w-full py-3 pl-12 pr-4 text-[#F1F5F9] 
+            bg-[#1E293B]/80 rounded-xl border border-[#38BDF8]/20 
+            placeholder-[#F1F5F9]/50
+            focus:border-[#38BDF8]/40 focus:bg-[#1E293B] 
+            focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/20 
+            transition-all duration-300
+            backdrop-blur-sm
+            shadow-[0_0_20px_rgba(56,189,248,0.1)]
+            focus:shadow-[0_0_25px_rgba(56,189,248,0.2)]"
         />
+
+        {/* Background Gradient Effect */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#38BDF8]/20 to-[#F59E0B]/20 
+          rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-300 -z-10">
+        </div>
       </div>
     </div>
   );

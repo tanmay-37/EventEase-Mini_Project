@@ -1,8 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { UserAuth } from "../context/AuthContext";
 
 const EventOverlay = ({ title, isHost, isRegistered, onRegister, onViewDetails, id, isRecentEvent }) => {
   const navigate = useNavigate();
+  const { user } = UserAuth();
+
+  const handleRegister = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    onRegister();
+  };
 
   return (
     <div
@@ -52,7 +62,7 @@ const EventOverlay = ({ title, isHost, isRegistered, onRegister, onViewDetails, 
         </button>
       ) : (
         <button
-          onClick={onRegister}
+          onClick={handleRegister}
           className="mt-3 bg-gradient-to-r from-[#38BDF8] to-[#F59E0B] text-[#0F172A] 
             font-semibold py-2 px-6 text-lg rounded-lg
             shadow-[0_0_20px_rgba(56,189,248,0.3)]

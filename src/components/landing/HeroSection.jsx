@@ -22,6 +22,19 @@ const HeroSection = () => {
     } else {
       navigate('/login');
     }
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+  };
+
+  const handleEventRegistration = (eventId) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    navigate(`/event/${eventId}/register`);
   };
 
   return (

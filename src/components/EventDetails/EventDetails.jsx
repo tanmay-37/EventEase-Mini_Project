@@ -33,6 +33,15 @@ const EventDetails = () => {
       }
     };
 
+    const handleRegisterClick = () => {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+      
+      navigate(`/event/${id}/register`);
+    };
+
     const checkRegistration = async () => {
       if (!user) return;
 
